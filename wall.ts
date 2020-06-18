@@ -1,5 +1,5 @@
 /// <reference path="mapobject.ts" />
-/// <reference path="node_modules/@types/jquery/index.d.ts" />
+/// <reference types="jquery" />
 
 namespace MapObjects {
     const $:JQueryStatic = (window as any)["jQuery"];

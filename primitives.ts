@@ -8,6 +8,23 @@ namespace MapObjects {
         }
     }
 
+    export class Size {
+        width:number;
+        height:number;
+        constructor(width:number, height: number) {
+            this.width=width;
+            this.height=height;
+        }
+
+        scale(factor:number):Size {
+            return new Size(this.width*factor,this.height*factor);
+        }
+
+        subtract(other:Size):Size {
+            return new Size(this.width-other.width,this.height-other.height);
+        }
+    }
+
     export enum Feature {
         Placeable = 1,
         Rotateable,
