@@ -13,11 +13,11 @@ namespace MapObjects {
         */
        rotation:number;
 
-       /*
-       the center around which this object rotates.
-       it's only purpose is to recalculate joint points if 
-       nessecary.
-       */
+        /*
+        the center around which this object rotates.
+        it's only purpose is to recalculate joint points if 
+        nessecary.
+        */
        rotationCenter:Point;
     }
 
