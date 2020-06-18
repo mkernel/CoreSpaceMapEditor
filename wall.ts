@@ -7,6 +7,7 @@ namespace MapObjects {
     export class Wall extends MapObject implements IPlaceable, IRotateable, IJoinable {
         position: Point;
         rotation: number;
+        rotationCenter: Point;
         joints: Point[];
         image: HTMLImageElement;
 
@@ -23,6 +24,7 @@ namespace MapObjects {
             let x2 = parseInt($(this.image).data("x2"));
             let y2 = parseInt($(this.image).data("y2"));
             this.joints = [new Point(x1,y1),new Point(x2,y2)]
+            this.rotationCenter = this.joints[0];
         }
 
         draw(context:CanvasRenderingContext2D) {
