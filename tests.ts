@@ -1,4 +1,5 @@
 /// <reference path="mapobject.ts" />
+/// <reference path="wall.ts" />
 
 class TestObject extends MapObjects.MapObject {
     getFeatures():MapObjects.Feature[] {
