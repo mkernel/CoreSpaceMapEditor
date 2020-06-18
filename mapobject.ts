@@ -16,5 +16,11 @@ namespace MapObjects {
             });
             return found;
         }
+        draw(context:CanvasRenderingContext2D) {
+            //the default implementation does nothing.
+            //this needs to be overriden by everyone else.
+            //important: the renderer already translates and
+            //rotates for you. as long as those flags are set.
+        }
     }
 }

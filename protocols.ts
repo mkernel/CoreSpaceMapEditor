@@ -7,6 +7,11 @@ namespace MapObjects {
 
     export interface IRotateable {
         rotation:number;
+        /*
+        The rotation angle, clockwise in radians. 
+        You can use degree * Math.PI / 180 to 
+        calculate a radian from a degree.
+        */
     }
 
     export interface IJoinable {

@@ -10,6 +10,8 @@ namespace MapEngine {
         scaling: number;
         offset: MapObjects.Point;
 
+        objects:MapObjects.MapObject[] = [];
+
         constructor(canvas:HTMLCanvasElement,background:HTMLImageElement) {
             this.canvas = canvas;
             this.context = this.canvas.getContext("2d");
@@ -36,6 +38,19 @@ namespace MapEngine {
             this.context.translate(this.offset.x,this.offset.y);
             this.context.scale(this.scaling,this.scaling);
             this.context.drawImage(this.background,0,0);
+            this.objects.forEach(object => {
+                this.context.save();
+                if(object.hasFeature(MapObjects.Feature.Placeable)) {
+                    let casted = (object as any) as MapObjects.IPlaceable;
+                    this.context.translate(casted.position.x,casted.position.y);
+                }
+                if(object.hasFeature(MapObjects.Feature.Rotateable)) {
+                    let casted = (object as any) as MapObjects.IRotateable;
+                    this.context.rotate(casted.rotation);
+                }
+                object.draw(this.context);
+                this.context.restore();
+            });
             this.context.restore();
         }
     }
