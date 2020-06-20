@@ -18,6 +18,14 @@ namespace MapObjects {
         addSize(size:Size):Point {
             return new Point(this.x+size.width,this.y+size.height);
         }
+
+        subtractPoint(pt:Point): Point {
+            return new Point(this.x-pt.x,this.y-pt.y);
+        }
+
+        addPoint(pt:Point): Point {
+            return new Point(this.x+pt.x,this.y+pt.y);
+        }
     }
 
     export class Size {

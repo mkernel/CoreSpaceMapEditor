@@ -3,6 +3,13 @@
 /// <reference path="mapobject.ts" />
 
 namespace MapEngine {
+
+    export enum MouseState {
+        idle = 0,
+        primaryDown,
+        primaryDownMoved,
+    }
+
     export class Engine {
         canvas: HTMLCanvasElement;
         context: CanvasRenderingContext2D;
@@ -18,6 +25,10 @@ namespace MapEngine {
 
         objects:MapObjects.MapObject[] = [];
         hovering:MapObjects.MapObject;
+        focused:MapObjects.MapObject;
+        mousePosition:MapObjects.Point;
+        mouseState:MouseState = MouseState.idle;
+        
 
         constructor(canvas:HTMLCanvasElement,background:HTMLImageElement) {
             this.canvas = canvas;
@@ -42,6 +53,8 @@ namespace MapEngine {
             this.interactionmatrix.invertSelf();
 
             this.canvas.addEventListener('mousemove',this.onMouseMove);
+            this.canvas.addEventListener('mousedown',this.onMouseDown);
+            this.canvas.addEventListener('mouseup',this.onMouseUp);
 
             this.offscreen = document.createElement('canvas');
             document.body.appendChild(this.offscreen);
@@ -62,7 +75,16 @@ namespace MapEngine {
             this.objects.forEach(object => {
                 this.context.save();
                 let highlighted:HTMLCanvasElement;
-                if(this.hovering === object) {
+                if(this.focused === object) {
+                    this.offscreenContext.save();
+                    this.offscreenContext.clearRect(0,0,this.mapSize.width,this.mapSize.height);
+                    this.offscreenContext.fillStyle="#00F";
+                    this.offscreenContext.fillRect(0,0,this.mapSize.width,this.mapSize.height);
+                    this.offscreenContext.globalCompositeOperation = "destination-in";
+                    this.renderObject(object,this.offscreenContext);
+                    this.offscreenContext.restore();
+                }
+                else if(this.hovering === object) {
                     this.offscreenContext.save();
                     this.offscreenContext.clearRect(0,0,this.mapSize.width,this.mapSize.height);
                     //we need the rendered object in a new canvas
@@ -74,11 +96,15 @@ namespace MapEngine {
                     this.offscreenContext.restore();
                 }
 
-                this.renderObject(object,this.context);
 
-                if(this.hovering === object) {
-                    this.context.globalCompositeOperation="lighter";
+                if(this.focused === object) {
                     this.context.drawImage(this.offscreen,0,0);
+                } else {
+                    this.renderObject(object,this.context);
+                    if(this.hovering === object) {
+                        this.context.globalCompositeOperation="lighter";
+                        this.context.drawImage(this.offscreen,0,0);
+                    }
                 }
                 this.context.restore();
             });
@@ -105,52 +131,88 @@ namespace MapEngine {
             let converted = MapObjects.Point.fromDOMPoint(this.interactionmatrix.transformPoint(pt.toDOMPoint()));
             let rect=new MapObjects.Rect(new MapObjects.Point(0,0),this.mapSize);
             if(rect.containsPoint(converted)) {
-                /*
-                this is a "legitimate" point. So we should continue to work with it.
-                first things first: hit testing. 
-                we have to examine every object we know. However: objects may be rotated.
-                that makes hit testing a little more complex.
-                */
-               let hit: MapObjects.MapObject;
-               this.objects.forEach(object => {
-                   let calculatedPoint = converted;
-                   if(object.hasFeature(MapObjects.Feature.Placeable)) {
-                       /*
-                       this is a placed object. we have to normalize to its location
-                       */
-                      let casted = <MapObjects.IPlaceable><any>(object);
-                      let matrix = new DOMMatrix();
-                      matrix.translateSelf(casted.position.x,casted.position.y);
-                      matrix.invertSelf();
-                      calculatedPoint = MapObjects.Point.fromDOMPoint(matrix.transformPoint(converted.toDOMPoint()));
-                   }
-                   if(object.hasFeature(MapObjects.Feature.Rotateable)) {
-                       /*
-                       this is a rotateable object. for easier hit testing we
-                       build a rotation matrix and invert it.
-                       that way we can bring the cursor back into a normalized hitbox.
-                       */
-                      let casted = <MapObjects.IRotateable><any>(object);
-                      let matrix = new DOMMatrix();
-                      //we need to respect the rotation center.
-                      matrix.translateSelf(casted.rotationCenter.x,casted.rotationCenter.y);
-                      //who could've thought that canvas and DOMMatrix use different angle scales
-                      matrix.rotateSelf(casted.rotation * (180/Math.PI));
-                      matrix.invertSelf();
-                      calculatedPoint = MapObjects.Point.fromDOMPoint(matrix.transformPoint(calculatedPoint.toDOMPoint()));
-                   }
-                   if(object.hitTest(calculatedPoint)) {
-                       hit = object;
-                   }
-               });
-               /* 
-               we now have a hit object. therefore it's time to highlight it. of course.
-               */
-              if(hit !== this.hovering) {
-                  this.hovering = hit;
-                  this.render();
-              }
+                if((this.mouseState == MouseState.primaryDown || this.mouseState==MouseState.primaryDownMoved) && this.hovering.hasFeature(MapObjects.Feature.Placeable)) {
+                    /*
+                    a pressed primary button WHILE moving means: drag and drop.
+                    */
+                   this.mouseState = MouseState.primaryDownMoved;
+                   let casted = <MapObjects.IPlaceable><any>(this.hovering);
+                   let pt = casted.position;
+                   let diff = converted.subtractPoint(this.mousePosition);
+                   pt = pt.addPoint(diff);
+                   casted.position=pt;
+                   this.render();
+                } else {
+                    /*
+                    this is a "legitimate" point. So we should continue to work with it.
+                    first things first: hit testing. 
+                    we have to examine every object we know. However: objects may be rotated.
+                    that makes hit testing a little more complex.
+                    */
+                    let hit: MapObjects.MapObject;
+                    this.objects.forEach(object => {
+                        let calculatedPoint = converted;
+                        if(object.hasFeature(MapObjects.Feature.Placeable)) {
+                            /*
+                            this is a placed object. we have to normalize to its location
+                            */
+                            let casted = <MapObjects.IPlaceable><any>(object);
+                            let matrix = new DOMMatrix();
+                            matrix.translateSelf(casted.position.x,casted.position.y);
+                            matrix.invertSelf();
+                            calculatedPoint = MapObjects.Point.fromDOMPoint(matrix.transformPoint(converted.toDOMPoint()));
+                        }
+                        if(object.hasFeature(MapObjects.Feature.Rotateable)) {
+                            /*
+                            this is a rotateable object. for easier hit testing we
+                            build a rotation matrix and invert it.
+                            that way we can bring the cursor back into a normalized hitbox.
+                            */
+                            let casted = <MapObjects.IRotateable><any>(object);
+                            let matrix = new DOMMatrix();
+                            //we need to respect the rotation center.
+                            matrix.translateSelf(casted.rotationCenter.x,casted.rotationCenter.y);
+                            //who could've thought that canvas and DOMMatrix use different angle scales
+                            matrix.rotateSelf(casted.rotation * (180/Math.PI));
+                            matrix.invertSelf();
+                            calculatedPoint = MapObjects.Point.fromDOMPoint(matrix.transformPoint(calculatedPoint.toDOMPoint()));
+                        }
+                        if(object.hitTest(calculatedPoint)) {
+                            hit = object;
+                        }
+                    });
+                    /* 
+                    we now have a hit object. therefore it's time to highlight it. of course.
+                    */
+                    if(hit !== this.hovering) {
+                        this.hovering = hit;
+                        this.render();
+                    }
+                }
+                this.mousePosition = converted;
             }
         }
+
+        onMouseDown: {(event:MouseEvent):void} = (event:MouseEvent) => {
+            if(event.button == 0 && this.focused != null && this.hovering !== this.focused) {
+                this.focused = null;
+                this.render();
+            }
+            if(event.button == 0 && this.hovering != null) {
+                //somebody drag'n'drops or clicks. we will find out.
+                this.mouseState = MouseState.primaryDown;
+            }
+        }
+
+        onMouseUp: {(event:MouseEvent):void} = (event:MouseEvent) => {
+            if(this.mouseState == MouseState.primaryDown) {
+                //this means the user has clicked. Soo... we need to focus the object.
+                this.focused = this.hovering;
+                this.render();
+            }
+            this.mouseState = MouseState.idle;
+        }
+
+
     }
 }
