@@ -22,5 +22,9 @@ namespace MapObjects {
             //important: the renderer already translates and
             //rotates for you. as long as those flags are set.
         }
+
+        hitTest(pt:Point): boolean {
+            return false;
+        }
     }
 }

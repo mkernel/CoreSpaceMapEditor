@@ -32,5 +32,10 @@ namespace MapObjects {
             //that gives a more natural rotation.
             context.drawImage(this.image,-this.joints[0].x,-this.joints[0].y);
         }
+
+        hitTest(pt:Point):boolean {
+            let rect = new Rect(new Point(-this.joints[0].x,-this.joints[0].y),new Size(this.image.naturalWidth,this.image.naturalHeight));
+            return rect.containsPoint(pt);
+        }
     }
 }

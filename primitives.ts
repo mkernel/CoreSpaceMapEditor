@@ -6,6 +6,18 @@ namespace MapObjects {
             this.x=x;
             this.y=y;
         }
+
+        toDOMPoint() :DOMPoint {
+            return new DOMPoint(this.x,this.y);
+        }
+
+        static fromDOMPoint(pt:DOMPoint):Point {
+            return new Point(pt.x,pt.y);
+        }
+
+        addSize(size:Size):Point {
+            return new Point(this.x+size.width,this.y+size.height);
+        }
     }
 
     export class Size {
@@ -22,6 +34,27 @@ namespace MapObjects {
 
         subtract(other:Size):Size {
             return new Size(this.width-other.width,this.height-other.height);
+        }
+    }
+
+    export class Rect {
+        origin:Point;
+        size:Size;
+
+        constructor(origin:Point,size:Size) {
+            this.origin=origin;
+            this.size=size;
+        }
+
+        containsPoint(pt:Point): boolean {
+            let upper = this.origin.addSize(this.size)
+            if(pt.x >= this.origin.x 
+                && pt.y >= this.origin.y
+                && pt.x < upper.x
+                && pt.y < upper.y) {
+                return true;
+            }
+            return false;
         }
     }
 
