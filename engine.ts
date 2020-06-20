@@ -12,6 +12,8 @@ namespace MapEngine {
 
     export class Engine {
         canvas: HTMLCanvasElement;
+        deleteButton:HTMLButtonElement;
+        rotateButton:HTMLButtonElement;
         context: CanvasRenderingContext2D;
         renderingSize: MapObjects.Size;
         background: HTMLImageElement;
@@ -30,8 +32,10 @@ namespace MapEngine {
         mouseState:MouseState = MouseState.idle;
         
 
-        constructor(canvas:HTMLCanvasElement,background:HTMLImageElement) {
+        constructor(canvas:HTMLCanvasElement,background:HTMLImageElement,deleteButton:HTMLButtonElement,rotateButton:HTMLButtonElement) {
             this.canvas = canvas;
+            this.deleteButton=deleteButton;
+            this.rotateButton=rotateButton;
             this.context = this.canvas.getContext("2d");
             this.renderingSize = new MapObjects.Size(this.canvas.width,this.canvas.height);
             this.background = background;
@@ -55,6 +59,8 @@ namespace MapEngine {
             this.canvas.addEventListener('mousemove',this.onMouseMove);
             this.canvas.addEventListener('mousedown',this.onMouseDown);
             this.canvas.addEventListener('mouseup',this.onMouseUp);
+            this.deleteButton.addEventListener('click',this.deleteClick);
+            this.rotateButton.addEventListener('click',this.rotateClick);
 
             this.offscreen = document.createElement('canvas');
             document.body.appendChild(this.offscreen);
@@ -197,6 +203,8 @@ namespace MapEngine {
             if(event.button == 0 && this.focused != null && this.hovering !== this.focused) {
                 this.focused = null;
                 this.render();
+                $(this.deleteButton).hide();
+                $(this.rotateButton).hide();
             }
             if(event.button == 0 && this.hovering != null) {
                 //somebody drag'n'drops or clicks. we will find out.
@@ -209,10 +217,38 @@ namespace MapEngine {
                 //this means the user has clicked. Soo... we need to focus the object.
                 this.focused = this.hovering;
                 this.render();
+                $(this.deleteButton).show();
+                if(this.focused.hasFeature(MapObjects.Feature.Rotateable)) {
+                    $(this.rotateButton).show();
+                }
             }
             this.mouseState = MouseState.idle;
         }
 
+        deleteClick: {(event:MouseEvent) : void} = (event:MouseEvent) => {
+            let idx = this.objects.indexOf(this.focused);
+            this.objects.splice(idx, 1);
+            this.focused = null;
+            this.render();
+        }
+
+        rotateClick: {(event:MouseEvent):void} = (event:MouseEvent) => {
+            let casted = <MapObjects.IRotateable><any>this.focused;
+            let angles = [MapObjects.Angles.Zero,MapObjects.Angles.Fourtyfive,MapObjects.Angles.Ninety,MapObjects.Angles.HundredThirtyFive];
+            let found=false;
+            for(let angle in angles) {
+                if(angles[angle] > casted.rotation) {
+                    found=true;
+                    casted.rotation=angles[angle];
+                    this.render();
+                    break;
+                }
+            }
+            if(!found) {
+                casted.rotation = MapObjects.Angles.Zero;
+                this.render();
+            }
+        }
 
     }
 }

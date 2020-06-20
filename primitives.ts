@@ -74,7 +74,8 @@ namespace MapObjects {
 
     export enum Angles {
         Zero = 0,
-        Fourtyfive = 45 * Math.PI / 180,
-        Ninety = 90 * Math.PI / 180,
+        Fourtyfive = 45.0 * Math.PI / 180,
+        Ninety = 90.0 * Math.PI / 180,
+        HundredThirtyFive = 135.0 * Math.PI / 180,
     }
 }
