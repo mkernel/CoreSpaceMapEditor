@@ -26,6 +26,14 @@ namespace MapObjects {
         addPoint(pt:Point): Point {
             return new Point(this.x+pt.x,this.y+pt.y);
         }
+
+        scale(scaling: number): Point {
+            return new Point(this.x*scaling,this.y*scaling);
+        }
+
+        length(): number {
+            return Math.sqrt(this.x*this.x+this.y*this.y);
+        }
     }
 
     export class Size {

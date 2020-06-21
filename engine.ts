@@ -1,6 +1,7 @@
 /// <reference path="primitives.ts" />
 /// <reference path="protocols.ts" />
 /// <reference path="mapobject.ts" />
+/// <reference path="enginehelpers.ts" />
 
 namespace MapEngine {
 
@@ -27,6 +28,8 @@ namespace MapEngine {
 
         objects:MapObjects.MapObject[] = [];
         hovering:MapObjects.MapObject;
+        //if the current object snapped, this contains the "original" position for further calculation.
+        shadowedPosition:MapObjects.Point;
         focused:MapObjects.MapObject;
         mousePosition:MapObjects.Point;
         mouseState:MouseState = MouseState.idle;
@@ -141,13 +144,26 @@ namespace MapEngine {
                     /*
                     a pressed primary button WHILE moving means: drag and drop.
                     */
-                   this.mouseState = MouseState.primaryDownMoved;
-                   let casted = <MapObjects.IPlaceable><any>(this.hovering);
-                   let pt = casted.position;
-                   let diff = converted.subtractPoint(this.mousePosition);
-                   pt = pt.addPoint(diff);
-                   casted.position=pt;
-                   this.render();
+                    this.mouseState = MouseState.primaryDownMoved;
+                    let casted = <MapObjects.IPlaceable><any>(this.hovering);
+                    let pt = casted.position;
+                    if(this.shadowedPosition != null) {
+                        pt = this.shadowedPosition;
+                    }
+                    let diff = converted.subtractPoint(this.mousePosition);
+                    pt = pt.addPoint(diff);
+                    /*
+                    as we now have the "new" position, we have to do a snap-test against "everything".
+                    */
+                    let snapPt = this.snapTest(this.hovering,pt);
+                    if(snapPt != null) {
+                        casted.position=snapPt;
+                        this.shadowedPosition = pt;
+                    } else {
+                        this.shadowedPosition = null;
+                        casted.position=pt;
+                    }
+                    this.render();
                 } else {
                     /*
                     this is a "legitimate" point. So we should continue to work with it.
@@ -199,6 +215,44 @@ namespace MapEngine {
             }
         }
 
+        snapTest(object:MapObjects.MapObject,newPoint:MapObjects.Point):MapObjects.Point {
+            /*
+            first things first: we have to calculate the current's objects snap points.
+            therefore we have to check wether it has snap points or not.
+             */
+            if(!object.hasFeature(MapObjects.Feature.Joinable)) {
+                return null;
+            }
+            let joinable = <MapObjects.IJoinable><any>object;
+            let joints = transformedJoints(joinable,newPoint);
+            let snapped=false;
+            this.objects.forEach(candidate => {
+                if(candidate === object || snapped) {
+                    return;
+                }
+                if(candidate.hasFeature(MapObjects.Feature.Joinable)) {
+                    let castedcandidate = <MapObjects.IJoinable><any>candidate;
+                    let pt = new MapObjects.Point(0,0);
+                    if(candidate.hasFeature(MapObjects.Feature.Placeable)) {
+                        let placeable = <MapObjects.IPlaceable><any>candidate;
+                        pt = placeable.position;
+                    }
+                    let candidatejoints = transformedJoints(castedcandidate,pt);
+                    //now we have to find candidates.
+                    let candidates = snapCandidate(joints,candidatejoints,this.scaling,10);
+                    if(candidates != null) {
+                        let diff = candidates[1].subtractPoint(candidates[0]);
+                        newPoint = newPoint.addPoint(diff);
+                        snapped = true;
+                    }
+                }
+            });
+            if(!snapped) {
+                return null;
+            }
+            return newPoint;
+        }
+
         onMouseDown: {(event:MouseEvent):void} = (event:MouseEvent) => {
             if(event.button == 0 && this.focused != null && this.hovering !== this.focused) {
                 this.focused = null;
@@ -209,6 +263,7 @@ namespace MapEngine {
             if(event.button == 0 && this.hovering != null) {
                 //somebody drag'n'drops or clicks. we will find out.
                 this.mouseState = MouseState.primaryDown;
+                this.shadowedPosition=null;
             }
         }
 
@@ -223,6 +278,7 @@ namespace MapEngine {
                 }
             }
             this.mouseState = MouseState.idle;
+            this.shadowedPosition=null;
         }
 
         deleteClick: {(event:MouseEvent) : void} = (event:MouseEvent) => {

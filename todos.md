@@ -7,7 +7,7 @@
 * [x] focused object: buttons for certain operations
 * [x] delete object
 * [x] rotateable: rotate object
-* [ ] snap at joints during drag/drop
+* [x] snap at joints during drag/drop
 * [ ] build a structure out of snappings
 * [ ] event delegation into "objects" for structures to allow wall selection inside of a structure
 * [ ] remove wall from structure
