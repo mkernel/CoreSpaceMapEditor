@@ -2,6 +2,7 @@
 /// <reference path="protocols.ts" />
 /// <reference path="mapobject.ts" />
 /// <reference path="enginehelpers.ts" />
+/// <reference path="structure.ts" />
 
 namespace MapEngine {
 
@@ -30,6 +31,7 @@ namespace MapEngine {
         hovering:MapObjects.MapObject;
         //if the current object snapped, this contains the "original" position for further calculation.
         shadowedPosition:MapObjects.Point;
+        snappingTarget:MapObjects.MapObject;
         focused:MapObjects.MapObject;
         mousePosition:MapObjects.Point;
         mouseState:MouseState = MouseState.idle;
@@ -90,14 +92,14 @@ namespace MapEngine {
                     this.offscreenContext.fillStyle="#00F";
                     this.offscreenContext.fillRect(0,0,this.mapSize.width,this.mapSize.height);
                     this.offscreenContext.globalCompositeOperation = "destination-in";
-                    this.renderObject(object,this.offscreenContext);
+                    renderObject(object,this.offscreenContext);
                     this.offscreenContext.restore();
                 }
                 else if(this.hovering === object) {
                     this.offscreenContext.save();
                     this.offscreenContext.clearRect(0,0,this.mapSize.width,this.mapSize.height);
                     //we need the rendered object in a new canvas
-                    this.renderObject(object,this.offscreenContext);
+                    renderObject(object,this.offscreenContext);
                     //render the object
                     this.offscreenContext.globalCompositeOperation = "source-in";
                     this.offscreenContext.fillStyle="#888";
@@ -109,7 +111,7 @@ namespace MapEngine {
                 if(this.focused === object) {
                     this.context.drawImage(this.offscreen,0,0);
                 } else {
-                    this.renderObject(object,this.context);
+                    renderObject(object,this.context);
                     if(this.hovering === object) {
                         this.context.globalCompositeOperation="lighter";
                         this.context.drawImage(this.offscreen,0,0);
@@ -118,20 +120,6 @@ namespace MapEngine {
                 this.context.restore();
             });
             this.context.restore();
-        }
-
-        renderObject(object:MapObjects.MapObject,context:CanvasRenderingContext2D) {
-            context.save();
-            if(object.hasFeature(MapObjects.Feature.Placeable)) {
-                let casted = (object as any) as MapObjects.IPlaceable;
-                context.translate(casted.position.x,casted.position.y);
-            }
-            if(object.hasFeature(MapObjects.Feature.Rotateable)) {
-                let casted = (object as any) as MapObjects.IRotateable;
-                context.rotate(casted.rotation);
-            }
-            object.draw(context);
-            context.restore();
         }
 
         onMouseMove: { (event:MouseEvent) : void } = (event:MouseEvent) => {
@@ -173,30 +161,7 @@ namespace MapEngine {
                     */
                     let hit: MapObjects.MapObject;
                     this.objects.forEach(object => {
-                        let calculatedPoint = converted;
-                        if(object.hasFeature(MapObjects.Feature.Placeable)) {
-                            /*
-                            this is a placed object. we have to normalize to its location
-                            */
-                            let casted = <MapObjects.IPlaceable><any>(object);
-                            let matrix = new DOMMatrix();
-                            matrix.translateSelf(casted.position.x,casted.position.y);
-                            matrix.invertSelf();
-                            calculatedPoint = MapObjects.Point.fromDOMPoint(matrix.transformPoint(converted.toDOMPoint()));
-                        }
-                        if(object.hasFeature(MapObjects.Feature.Rotateable)) {
-                            /*
-                            this is a rotateable object. for easier hit testing we
-                            build a rotation matrix and invert it.
-                            that way we can bring the cursor back into a normalized hitbox.
-                            */
-                            let casted = <MapObjects.IRotateable><any>(object);
-                            let matrix = new DOMMatrix();
-                            //who could've thought that canvas and DOMMatrix use different angle scales
-                            matrix.rotateSelf(casted.rotation * (180/Math.PI));
-                            matrix.invertSelf();
-                            calculatedPoint = MapObjects.Point.fromDOMPoint(matrix.transformPoint(calculatedPoint.toDOMPoint()));
-                        }
+                        let calculatedPoint = transformPointForHitTesting(converted,object);
                         if(object.hitTest(calculatedPoint)) {
                             hit = object;
                         }
@@ -237,11 +202,12 @@ namespace MapEngine {
                     }
                     let candidatejoints = transformedJoints(castedcandidate,pt);
                     //now we have to find candidates.
-                    let candidates = snapCandidate(joints,candidatejoints,this.scaling,10);
+                    let candidates = snapCandidate(joints,candidatejoints,this.scaling,20);
                     if(candidates != null) {
                         let diff = candidates[1].subtractPoint(candidates[0]);
                         newPoint = newPoint.addPoint(diff);
                         snapped = true;
+                        this.snappingTarget = candidate;
                     }
                 }
             });
@@ -274,7 +240,23 @@ namespace MapEngine {
                 if(this.focused.hasFeature(MapObjects.Feature.Rotateable)) {
                     $(this.rotateButton).show();
                 }
-            }
+            } else if(this.mouseState == MouseState.primaryDownMoved && this.shadowedPosition != null) {
+                //so this is "the moment" to create a structure out of the new snapped element.
+                if(this.snappingTarget instanceof MapObjects.Structure) {
+                    this.snappingTarget.addElement(this.hovering);
+                } else {
+                    let structure = new MapObjects.Structure();
+                    structure.position = new MapObjects.Point(0,0);
+                    structure.addElement(this.snappingTarget);
+                    structure.addElement(this.hovering);
+                    this.objects.push(structure);
+                    let idx = this.objects.indexOf(this.snappingTarget);
+                    this.objects.splice(idx,1);
+                }
+                let idx = this.objects.indexOf(this.hovering);
+                this.objects.splice(idx,1);
+                this.render();
+            } 
             this.mouseState = MouseState.idle;
             this.shadowedPosition=null;
         }

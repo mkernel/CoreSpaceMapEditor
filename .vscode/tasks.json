@@ -6,7 +6,7 @@
         {
             "label": "Build testfile",
             "type": "shell",
-            "command": "tsc -outFile tests.js tests.ts",
+            "command": "tsc --lib DOM,ES5,ScriptHost,es2015 -outFile tests.js tests.ts",
             "problemMatcher": []
         }
     ]

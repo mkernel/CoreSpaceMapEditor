@@ -46,4 +46,46 @@ namespace MapEngine {
         return result;
 
     }
+
+    export function renderObject(object:MapObjects.MapObject,context:CanvasRenderingContext2D) {
+        context.save();
+        if(object.hasFeature(MapObjects.Feature.Placeable)) {
+            let casted = (object as any) as MapObjects.IPlaceable;
+            context.translate(casted.position.x,casted.position.y);
+        }
+        if(object.hasFeature(MapObjects.Feature.Rotateable)) {
+            let casted = (object as any) as MapObjects.IRotateable;
+            context.rotate(casted.rotation);
+        }
+        object.draw(context);
+        context.restore();
+    }
+
+    export function transformPointForHitTesting(pt:MapObjects.Point,object:MapObjects.MapObject) {
+        let calculatedPoint = pt;
+        if(object.hasFeature(MapObjects.Feature.Placeable)) {
+            /*
+            this is a placed object. we have to normalize to its location
+            */
+            let casted = <MapObjects.IPlaceable><any>(object);
+            let matrix = new DOMMatrix();
+            matrix.translateSelf(casted.position.x,casted.position.y);
+            matrix.invertSelf();
+            calculatedPoint = MapObjects.Point.fromDOMPoint(matrix.transformPoint(pt.toDOMPoint()));
+        }
+        if(object.hasFeature(MapObjects.Feature.Rotateable)) {
+            /*
+            this is a rotateable object. for easier hit testing we
+            build a rotation matrix and invert it.
+            that way we can bring the cursor back into a normalized hitbox.
+            */
+            let casted = <MapObjects.IRotateable><any>(object);
+            let matrix = new DOMMatrix();
+            //who could've thought that canvas and DOMMatrix use different angle scales
+            matrix.rotateSelf(casted.rotation * (180/Math.PI));
+            matrix.invertSelf();
+            calculatedPoint = MapObjects.Point.fromDOMPoint(matrix.transformPoint(calculatedPoint.toDOMPoint()));
+        }
+        return calculatedPoint;
+    }
 }

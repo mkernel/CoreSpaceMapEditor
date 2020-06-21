@@ -20,8 +20,13 @@ namespace Testing {
         wall = new MapObjects.Wall($("#wall_12")[0] as HTMLImageElement);
         wall.position = new MapObjects.Point(100,100);
         wall.rotation = MapObjects.Angles.Fourtyfive;
-        
         engine.objects.push(wall);
+
+        wall = new MapObjects.Wall($("#wall_12")[0] as HTMLImageElement);
+        wall.position = new MapObjects.Point(150,150);
+        wall.rotation = MapObjects.Angles.Zero;
+        engine.objects.push(wall);
+
         engine.render();
     });
 }
