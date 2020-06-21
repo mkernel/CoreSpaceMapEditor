@@ -8,7 +8,7 @@
 * [x] delete object
 * [x] rotateable: rotate object
 * [x] snap at joints during drag/drop
-* [ ] build a structure out of snappings
+* [x] build a structure out of snappings
 * [ ] event delegation into "objects" for structures to allow wall selection inside of a structure
 * [ ] remove wall from structure
 * [ ] wall removal might split up a structure into multiples

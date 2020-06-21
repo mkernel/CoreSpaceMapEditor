@@ -89,10 +89,10 @@ namespace MapEngine {
                 if(this.focused === object) {
                     this.offscreenContext.save();
                     this.offscreenContext.clearRect(0,0,this.mapSize.width,this.mapSize.height);
+                    renderObject(object,this.offscreenContext);
+                    this.offscreenContext.globalCompositeOperation = "source-in";
                     this.offscreenContext.fillStyle="#00F";
                     this.offscreenContext.fillRect(0,0,this.mapSize.width,this.mapSize.height);
-                    this.offscreenContext.globalCompositeOperation = "destination-in";
-                    renderObject(object,this.offscreenContext);
                     this.offscreenContext.restore();
                 }
                 else if(this.hovering === object) {
