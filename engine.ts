@@ -192,8 +192,6 @@ namespace MapEngine {
                             */
                             let casted = <MapObjects.IRotateable><any>(object);
                             let matrix = new DOMMatrix();
-                            //we need to respect the rotation center.
-                            matrix.translateSelf(casted.rotationCenter.x,casted.rotationCenter.y);
                             //who could've thought that canvas and DOMMatrix use different angle scales
                             matrix.rotateSelf(casted.rotation * (180/Math.PI));
                             matrix.invertSelf();
