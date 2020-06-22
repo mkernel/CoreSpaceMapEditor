@@ -280,6 +280,8 @@ namespace MapEngine {
             let idx = this.objects.indexOf(this.focused);
             this.objects.splice(idx, 1);
             this.focused = null;
+            this.deleteButton.style.display="none";
+            this.rotateButton.style.display="none";
             this.render();
         }
 

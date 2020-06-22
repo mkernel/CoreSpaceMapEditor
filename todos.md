@@ -17,7 +17,7 @@
 * [x] loading json files again
 * [x] generate hi-res image
 * [x] support for Objects
-* [ ] support for Wall Decorations
+* [x] support for Wall Decorations
 * [ ] allow rotation while placing a new object
 * [ ] rotation: store last angle for placing new objects
 
