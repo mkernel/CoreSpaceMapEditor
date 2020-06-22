@@ -9,9 +9,9 @@
 * [x] rotateable: rotate object
 * [x] snap at joints during drag/drop
 * [x] build a structure out of snappings
-* [ ] event delegation into "objects" for structures to allow wall selection inside of a structure
-* [ ] remove wall from structure
-* [ ] wall removal might split up a structure into multiples
+* [x] event delegation into "objects" for structures to allow wall selection inside of a structure
+* [x] remove wall from structure
+* [x] wall removal might split up a structure into multiples
 * [ ] toolbar to add new items
 * [ ] save the whole thing as a json file
 * [ ] loading json files again

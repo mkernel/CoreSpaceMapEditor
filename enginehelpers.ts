@@ -47,7 +47,7 @@ namespace MapEngine {
 
     }
 
-    export function renderObject(object:MapObjects.MapObject,context:CanvasRenderingContext2D) {
+    export function renderObject(object:MapObjects.MapObject,context:CanvasRenderingContext2D,focused:boolean=false,offscreen:CanvasRenderingContext2D=null) {
         context.save();
         if(object.hasFeature(MapObjects.Feature.Placeable)) {
             let casted = (object as any) as MapObjects.IPlaceable;
@@ -57,7 +57,7 @@ namespace MapEngine {
             let casted = (object as any) as MapObjects.IRotateable;
             context.rotate(casted.rotation);
         }
-        object.draw(context);
+        object.draw(context,focused,offscreen);
         context.restore();
     }
 
@@ -87,5 +87,45 @@ namespace MapEngine {
             calculatedPoint = MapObjects.Point.fromDOMPoint(matrix.transformPoint(calculatedPoint.toDOMPoint()));
         }
         return calculatedPoint;
+    }
+
+    export function snapTest(object:MapObjects.MapObject,newPoint:MapObjects.Point,candidates:MapObjects.MapObject[],scaling:number):[MapObjects.Point,MapObjects.MapObject] {
+        /*
+        first things first: we have to calculate the current's objects snap points.
+        therefore we have to check wether it has snap points or not.
+         */
+        if(!object.hasFeature(MapObjects.Feature.Joinable)) {
+            return null;
+        }
+        let joinable = <MapObjects.IJoinable><any>object;
+        let joints = transformedJoints(joinable,newPoint);
+        let snapped=false;
+        let snapTarget:MapObjects.MapObject;
+        candidates.forEach(candidate => {
+            if(candidate === object || snapped) {
+                return;
+            }
+            if(candidate.hasFeature(MapObjects.Feature.Joinable)) {
+                let castedcandidate = <MapObjects.IJoinable><any>candidate;
+                let pt = new MapObjects.Point(0,0);
+                if(candidate.hasFeature(MapObjects.Feature.Placeable)) {
+                    let placeable = <MapObjects.IPlaceable><any>candidate;
+                    pt = placeable.position;
+                }
+                let candidatejoints = transformedJoints(castedcandidate,pt);
+                //now we have to find candidates.
+                let candidates = snapCandidate(joints,candidatejoints,scaling,20);
+                if(candidates != null) {
+                    let diff = candidates[1].subtractPoint(candidates[0]);
+                    newPoint = newPoint.addPoint(diff);
+                    snapped = true;
+                    snapTarget = candidate;
+                }
+            }
+        });
+        if(!snapped) {
+            return null;
+        }
+        return [newPoint,snapTarget];
     }
 }

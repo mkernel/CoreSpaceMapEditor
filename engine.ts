@@ -12,7 +12,7 @@ namespace MapEngine {
         primaryDownMoved,
     }
 
-    export class Engine {
+    export class Engine implements MapObjects.IEngine {
         canvas: HTMLCanvasElement;
         deleteButton:HTMLButtonElement;
         rotateButton:HTMLButtonElement;
@@ -87,13 +87,15 @@ namespace MapEngine {
                 this.context.save();
                 let highlighted:HTMLCanvasElement;
                 if(this.focused === object) {
-                    this.offscreenContext.save();
-                    this.offscreenContext.clearRect(0,0,this.mapSize.width,this.mapSize.height);
-                    renderObject(object,this.offscreenContext);
-                    this.offscreenContext.globalCompositeOperation = "source-in";
-                    this.offscreenContext.fillStyle="#00F";
-                    this.offscreenContext.fillRect(0,0,this.mapSize.width,this.mapSize.height);
-                    this.offscreenContext.restore();
+                    if(!object.customFocusRenderer()) {
+                        this.offscreenContext.save();
+                        this.offscreenContext.clearRect(0,0,this.mapSize.width,this.mapSize.height);
+                        renderObject(object,this.offscreenContext);
+                        this.offscreenContext.globalCompositeOperation = "source-in";
+                        this.offscreenContext.fillStyle="#00F";
+                        this.offscreenContext.fillRect(0,0,this.mapSize.width,this.mapSize.height);
+                        this.offscreenContext.restore();
+                    }
                 }
                 else if(this.hovering === object) {
                     this.offscreenContext.save();
@@ -109,7 +111,11 @@ namespace MapEngine {
 
 
                 if(this.focused === object) {
-                    this.context.drawImage(this.offscreen,0,0);
+                    if(!object.customFocusRenderer()) {
+                        this.context.drawImage(this.offscreen,0,0);
+                    } else {
+                        renderObject(object,this.context,true,this.offscreenContext);
+                    }
                 } else {
                     renderObject(object,this.context);
                     if(this.hovering === object) {
@@ -128,7 +134,25 @@ namespace MapEngine {
             let converted = MapObjects.Point.fromDOMPoint(this.interactionmatrix.transformPoint(pt.toDOMPoint()));
             let rect=new MapObjects.Rect(new MapObjects.Point(0,0),this.mapSize);
             if(rect.containsPoint(converted)) {
-                if((this.mouseState == MouseState.primaryDown || this.mouseState==MouseState.primaryDownMoved) && this.hovering.hasFeature(MapObjects.Feature.Placeable)) {
+                /*
+                 * Mouse Event Handling rules:
+                 * If the focused object handles mouse events: 
+                 *   - delegate to the object
+                 *   - handle hit testing for hovering.
+                 * If the focused object does NOT handle mouse events:
+                 *   - handle drag'n'drop
+                 *   - handle hit testing for hovering.
+                 */
+                if(this.focused != null && this.focused.handlesMouseEvents()) {
+                    //this object handles it's own mouse events. so we're telling it.
+                    let pt = converted;
+                    if(this.focused.hasFeature(MapObjects.Feature.Placeable)) {
+                        let cast = <MapObjects.IPlaceable><any>this.focused;
+                        pt = pt.subtractPoint(cast.position);
+                    }
+                    this.focused.mouseMove(pt,this);
+                }
+                else if((this.mouseState == MouseState.primaryDown || this.mouseState==MouseState.primaryDownMoved) && this.hovering.hasFeature(MapObjects.Feature.Placeable)) {
                     /*
                     a pressed primary button WHILE moving means: drag and drop.
                     */
@@ -143,16 +167,19 @@ namespace MapEngine {
                     /*
                     as we now have the "new" position, we have to do a snap-test against "everything".
                     */
-                    let snapPt = this.snapTest(this.hovering,pt);
+                    let snapPt = snapTest(this.hovering,pt,this.objects,this.scaling);
                     if(snapPt != null) {
-                        casted.position=snapPt;
+                        casted.position=snapPt[0];
+                        this.snappingTarget=snapPt[1];
                         this.shadowedPosition = pt;
                     } else {
                         this.shadowedPosition = null;
+                        this.snappingTarget = null;
                         casted.position=pt;
                     }
                     this.render();
-                } else {
+                } 
+                if(this.mouseState == MouseState.idle) {
                     /*
                     this is a "legitimate" point. So we should continue to work with it.
                     first things first: hit testing. 
@@ -178,46 +205,17 @@ namespace MapEngine {
             }
         }
 
-        snapTest(object:MapObjects.MapObject,newPoint:MapObjects.Point):MapObjects.Point {
-            /*
-            first things first: we have to calculate the current's objects snap points.
-            therefore we have to check wether it has snap points or not.
-             */
-            if(!object.hasFeature(MapObjects.Feature.Joinable)) {
-                return null;
-            }
-            let joinable = <MapObjects.IJoinable><any>object;
-            let joints = transformedJoints(joinable,newPoint);
-            let snapped=false;
-            this.objects.forEach(candidate => {
-                if(candidate === object || snapped) {
-                    return;
-                }
-                if(candidate.hasFeature(MapObjects.Feature.Joinable)) {
-                    let castedcandidate = <MapObjects.IJoinable><any>candidate;
-                    let pt = new MapObjects.Point(0,0);
-                    if(candidate.hasFeature(MapObjects.Feature.Placeable)) {
-                        let placeable = <MapObjects.IPlaceable><any>candidate;
-                        pt = placeable.position;
-                    }
-                    let candidatejoints = transformedJoints(castedcandidate,pt);
-                    //now we have to find candidates.
-                    let candidates = snapCandidate(joints,candidatejoints,this.scaling,20);
-                    if(candidates != null) {
-                        let diff = candidates[1].subtractPoint(candidates[0]);
-                        newPoint = newPoint.addPoint(diff);
-                        snapped = true;
-                        this.snappingTarget = candidate;
-                    }
-                }
-            });
-            if(!snapped) {
-                return null;
-            }
-            return newPoint;
-        }
-
         onMouseDown: {(event:MouseEvent):void} = (event:MouseEvent) => {
+            let pt = new MapObjects.Point(event.offsetX,event.offsetY);
+            let converted = MapObjects.Point.fromDOMPoint(this.interactionmatrix.transformPoint(pt.toDOMPoint()));
+            if(this.focused != null && this.focused.handlesMouseEvents() && this.focused === this.hovering) {
+                let pt = converted;
+                if(this.focused.hasFeature(MapObjects.Feature.Placeable)) {
+                    let cast = <MapObjects.IPlaceable><any>this.focused;
+                    pt = pt.subtractPoint(cast.position);
+                }
+                this.focused.mouseDown(pt,event.button,this);
+            }
             if(event.button == 0 && this.focused != null && this.hovering !== this.focused) {
                 this.focused = null;
                 this.render();
@@ -232,6 +230,16 @@ namespace MapEngine {
         }
 
         onMouseUp: {(event:MouseEvent):void} = (event:MouseEvent) => {
+            let pt = new MapObjects.Point(event.offsetX,event.offsetY);
+            let converted = MapObjects.Point.fromDOMPoint(this.interactionmatrix.transformPoint(pt.toDOMPoint()));
+            if(this.focused != null && this.focused.handlesMouseEvents()) {
+                let pt = converted;
+                if(this.focused.hasFeature(MapObjects.Feature.Placeable)) {
+                    let cast = <MapObjects.IPlaceable><any>this.focused;
+                    pt = pt.subtractPoint(cast.position);
+                }
+                this.focused.mouseUp(pt,event.button,this);
+            }
             if(this.mouseState == MouseState.primaryDown) {
                 //this means the user has clicked. Soo... we need to focus the object.
                 this.focused = this.hovering;

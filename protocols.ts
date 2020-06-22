@@ -1,4 +1,6 @@
 /// <reference path="primitives.ts" />
+/// <reference path="mapobject.ts" />
+
 namespace MapObjects {
 
     export interface IPlaceable {
@@ -23,5 +25,11 @@ namespace MapObjects {
 
     export interface IJoinable {
         joints:Point[];
+    }
+
+    export interface IEngine {
+        objects:MapObject[];
+        scaling:number
+        render();
     }
 }
