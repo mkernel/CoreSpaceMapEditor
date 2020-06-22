@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "dependencies": {
-    "jquery": "^3.5.1"
+    "@types/jqueryui": "^1.12.13",
+    "jquery": "^3.5.1",
+    "jqueryui": "^1.11.1"
   },
   "devDependencies": {
     "@types/jquery": "^3.3.38"

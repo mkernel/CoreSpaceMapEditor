@@ -2,12 +2,14 @@
 /// <reference path="wall.ts" />
 /// <reference path="serializer.ts" />
 /// <reference types="jquery" />
+/// <reference types="jqueryui" />
 
 namespace Testing {
     const $:JQueryStatic = (window as any)["jQuery"];
     let engine: MapEngine.Engine;
 
     $(window).on('load',function(){
+        $("div.sidebar").accordion();
         //this is domready, so let's get to it.
         let canvas = <HTMLCanvasElement>$("#canvas")[0];
         let background = <HTMLImageElement>$("#background")[0];
