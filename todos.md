@@ -13,5 +13,11 @@
 * [x] remove wall from structure
 * [x] wall removal might split up a structure into multiples
 * [x] toolbar to add new items
-* [ ] save the whole thing as a json file
-* [ ] loading json files again
+* [x] save the whole thing as a json file
+* [x] loading json files again
+* [ ] generate hi-res image
+* [ ] support for Objects
+* [ ] support for Wall Decorations
+* [ ] allow rotation while placing a new object
+* [ ] rotation: store last angle for placing new objects
+

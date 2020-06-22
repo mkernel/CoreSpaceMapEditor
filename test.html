@@ -26,6 +26,10 @@
                 padding: 0;
             }
 
+            .sidebar .commands {
+                list-style: none;
+            }
+
             .sidebar .objects img {
                 height:16px;
             }
@@ -55,10 +59,12 @@
                 <li><img class="wall" src="Assets/Walls/Half-Wall-Hatchwayx2.png" id="half_wall_hatchway_2" data-x1="16" data-y1="16" data-x2="140" data-y2="16"></li>
                 <li><img class="wall special" src="Assets/Walls/Quarantine-Partition.png" id="quarantine_partition" data-x1="2" data-y1="16" data-x2="265" data-y2="279" width="143"></li>
             </ul>
-        </div>
-        <div class="footerbar">
-            <button id="delete" style="display:none;">Delete</button>
-            <button id="rotate" style="display:none;">Rotate</button>
+            <ul class="commands">
+                <li><button id="delete" style="display:none;">Delete</button></li>
+                <li><button id="rotate" style="display:none;">Rotate</button></li>
+                <li><button id="save">Save Map</button><a style="display:none" id="save_link" download="map.json" href="">Download</a></li>
+                <li>Load Map: <input type="file" id="load"></li>
+            </ul>
         </div>
     </body>
 </html>

@@ -1,5 +1,6 @@
 /// <reference path="engine.ts" />
 /// <reference path="wall.ts" />
+/// <reference path="serializer.ts" />
 /// <reference types="jquery" />
 
 namespace Testing {
@@ -12,26 +13,34 @@ namespace Testing {
         let background = <HTMLImageElement>$("#background")[0];
         engine = new MapEngine.Engine(canvas,background,<HTMLButtonElement>($("#delete")[0]),<HTMLButtonElement>($("#rotate")[0]));
 
-        let wall = new MapObjects.Wall($("#wall_12")[0] as HTMLImageElement);
-        wall.position = new MapObjects.Point(16,16);
-        wall.rotation = MapObjects.Angles.Ninety;
-        engine.objects.push(wall);
-
-        wall = new MapObjects.Wall($("#wall_12")[0] as HTMLImageElement);
-        wall.position = new MapObjects.Point(100,100);
-        wall.rotation = MapObjects.Angles.Fourtyfive;
-        engine.objects.push(wall);
-
-        wall = new MapObjects.Wall($("#wall_12")[0] as HTMLImageElement);
-        wall.position = new MapObjects.Point(150,150);
-        wall.rotation = MapObjects.Angles.Zero;
-        engine.objects.push(wall);
-
         $(document).on('click','.wall',function(){
-            wall = new MapObjects.Wall(this);
+            let wall = new MapObjects.Wall(this);
             wall.position = new MapObjects.Point(0,0);
             wall.rotation = MapObjects.Angles.Zero;
             engine.placeNewObject(wall);
+        });
+        
+        $(document).on('click','#save',function(){
+            if ($("#save_link").attr('href') != "") {
+                URL.revokeObjectURL($("#save_link").attr('href'));
+            }
+            let serializer = new MapEngine.Serializer();
+            let result = serializer.serialize(engine.objects);
+            let blob = new Blob([result],{type:"application/json"});
+            let url = URL.createObjectURL(blob);
+            $("#save_link").attr('href',url);
+            $("#save_link")[0].click();
+        });
+        $(document).on('change','#load',function(){
+            let file = (<HTMLInputElement>$("#load")[0]).files[0];
+            let reader = new FileReader();
+            reader.onload=function(e){
+                let serializer = new MapEngine.Serializer();
+                let objects = serializer.deserialize(e.target.result as string);
+                engine.objects = objects;
+                engine.render();
+            }
+            reader.readAsText(file);
         });
 
         engine.render();
