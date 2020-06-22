@@ -68,9 +68,10 @@ namespace MapEngine {
                                 let wall = new MapObjects.Wall($("#"+element.id)[0] as HTMLImageElement);
                                 wall.position = new MapObjects.Point(element.position.x,element.position.y);
                                 wall.rotation = element.rotation;
-                                structure.addElement(wall);
+                                structure.elements.push(wall);
                             }
                         });
+                        structure.rebuildJoints();
                         result.push(structure);
                     }
                 });
