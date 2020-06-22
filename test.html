@@ -16,28 +16,37 @@
                 padding-left: 10px;
                 height: 600px;
                 overflow: scroll;
+                width: 400px;
             }
             div.footerbar {
                 clear: both;
             }
-            .sidebar .wall:hover {
+            .sidebar .wall:hover, .sidebar .object:hover {
                 background-color: blue;
             }
-            .sidebar .objects {
+            .sidebar .walls, .sidebar .objects {
                 list-style: none;
                 margin: 0;
                 padding: 0;
+            }
+
+            .sidebar .objects li {
+                float: left;
             }
 
             .sidebar .commands {
                 list-style: none;
             }
 
-            .sidebar .objects img {
+            .sidebar .walls img {
                 height:16px;
             }
 
-            .sidebar .objects img.special {
+            .sidebar .objects img {
+                height: 50px;
+            }
+
+            .sidebar .walls img.special {
                 height:auto;
             }
         </style>
@@ -50,7 +59,7 @@
         <div class="sidebar">
             <h3>Walls</h3>
             <div>
-                <ul class="objects">
+                <ul class="walls">
                     <li><img class="wall" src="Assets/Walls/Wide-Entrance-Wallx2.png" id="wide_entrance_wall_2" data-x1="16" data-y1="16" data-x2="561" data-y2="16"></li>
     
                     <li><img class="wall" src="Assets/Walls/Wallx12.png" id="wall_12" data-x1="16" data-y1="16" data-x2="279" data-y2="16"></li>
@@ -65,13 +74,36 @@
                     <li><img class="wall special" src="Assets/Walls/Quarantine-Partition.png" id="quarantine_partition" data-x1="2" data-y1="16" data-x2="265" data-y2="279" width="143"></li>
                 </ul>
             </div>
+            <h3>Objects</h3>
+            <div>
+                <ul class="objects">
+                    <li><img class="object" src="Assets/Objects/Auto-doc.png" id="auto_doc"></li>
+                    <li><img class="object" src="Assets/Objects/Chairx2.png" id="chair_2"></li>
+                    <li><img class="object" src="Assets/Objects/CO2Scrubber.png" id="co2_scrubber"></li>
+                    <li><img class="object" src="Assets/Objects/Conduit.png" id="conduit"></li>
+                    <li><img class="object" src="Assets/Objects//GroundConduitx2.png" id="groundconduit"></li>
+                    <li><img class="object" src="Assets/Objects/Large_Crate_Bright_Red.png" id="large_crate_bright_red"></li>
+                    <li><img class="object" src="Assets/Objects/Large_Crate_Bright_Yellow.png" id="large_crate_bright_yellow"></li>
+                    <li><img class="object" src="Assets/Objects/Large_Crate_Greenx2.png" id="large_crate_green_2"></li>
+                    <li><img class="object" src="Assets/Objects/Large_Crate_Yellowx2.png" id="large_crate_yellow_2"></li>
+                    <li><img class="object" src="Assets/Objects//Particle_Transmitter.png" id="particle_transmitter"></li>
+                    <li><img class="object" src="Assets/Objects/Reactor.png" id="reactor"></li>
+                    <li><img class="object" src="Assets/Objects/Shuttle.png" id="shuttle"></li>
+                    <li><img class="object" src="Assets/Objects/Small_Crate_Bright_Red.png" id="small_crate_bright_red"></li>
+                    <li><img class="object" src="Assets/Objects/Small_Crate_Bright_Yellow.png" id="small_crate_bright_yellow"></li>
+                    <li><img class="object" src="Assets/Objects/Small_Crate_Greenx2.png" id="small_crate_green_2"></li>
+                    <li><img class="object" src="Assets/Objects//Small_Crate_Redx2.png" id="small_crate_red_2"></li>
+                    <li><img class="object" src="Assets/Objects/Tablex2.png" id="table_2"></li>
+                    <li><img class="object" src="Assets/Objects//Workstationx2.png" id="workstation_2"></li>
+                </ul>
+            </div>
             <h3>Functions</h3>
             <div>
                 <ul class="commands">
                     <li><button id="delete" style="display:none;">Delete</button></li>
                     <li><button id="rotate" style="display:none;">Rotate</button></li>
                     <li><button id="save">Save Map</button><a style="display:none" id="save_link" download="map.json" href="">Download</a></li>
-                    <li>Load Map: <input type="file" id="load"></li>
+                    <li><button id="load">Load Map</button> <input type="file" id="load_file" style="display: none;"></li>
                     <li><button id="image">Generate Image</button><a style="display:none" id="image_link" download="map.png" href="">Download</a></li>
                 </ul>
             </div>

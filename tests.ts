@@ -1,5 +1,6 @@
 /// <reference path="engine.ts" />
 /// <reference path="wall.ts" />
+/// <reference path="object.ts" />
 /// <reference path="serializer.ts" />
 /// <reference types="jquery" />
 /// <reference types="jqueryui" />
@@ -21,6 +22,12 @@ namespace Testing {
             wall.rotation = MapObjects.Angles.Zero;
             engine.placeNewObject(wall);
         });
+        $(document).on('click','.object',function(){
+            let object = new MapObjects.Object(this);
+            object.position = new MapObjects.Point(0,0);
+            object.rotation = MapObjects.Angles.Zero;
+            engine.placeNewObject(object);
+        });
 
         $(document).on('click','#save',function(){
             if ($("#save_link").attr('href') != "") {
@@ -33,8 +40,11 @@ namespace Testing {
             $("#save_link").attr('href',url);
             $("#save_link")[0].click();
         });
-        $(document).on('change','#load',function(){
-            let file = (<HTMLInputElement>$("#load")[0]).files[0];
+        $(document).on('click','#load',function(){
+            $("#load_file")[0].click();
+        });
+        $(document).on('change','#load_file',function(){
+            let file = (<HTMLInputElement>$("#load_file")[0]).files[0];
             let reader = new FileReader();
             reader.onload=function(e){
                 let serializer = new MapEngine.Serializer();
