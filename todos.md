@@ -12,6 +12,6 @@
 * [x] event delegation into "objects" for structures to allow wall selection inside of a structure
 * [x] remove wall from structure
 * [x] wall removal might split up a structure into multiples
-* [ ] toolbar to add new items
+* [x] toolbar to add new items
 * [ ] save the whole thing as a json file
 * [ ] loading json files again
