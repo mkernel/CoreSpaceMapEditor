@@ -172,49 +172,49 @@ namespace MapObjects {
                 let idx = this.elements.indexOf(this.hovering);
                 this.elements.splice(idx,1);
                 engine.objects.push(this.hovering);
-                //as a result, we have to check for multiple things:
-                /*
-                 * 1. is this structure down to one element? -> Remove the structure
-                 * 2. Did this break up the structure into two discrete structures? -> build a new structure
-                 * 3. Did the new structures each contain only one element? -> remove them.
-                 */
-                //first: the complex part.
-                let split = this.findDisconnectedElements();
-                //first of all: let's remove all found elements from our own array.
-                split.forEach(object => {
-                    let idx = this.elements.indexOf(object);
-                    this.elements.splice(idx,1);
-                });
-                if(split.length==1) {
-                    //this is a single object, so we have to "free it".
-                    let object = split[0];
-                    if(object.hasFeature(Feature.Placeable)) {
-                        let cast = <IPlaceable><any>object;
-                        cast.position = cast.position.addPoint(this.position);
-                    }
-                    engine.objects.push(object);
-                } else if(split.length > 1) {
-                    //so now we have another set which we have to create a structure for.
-                    let structure = new Structure();
-                    structure.position=this.position;
-                    split.forEach(object => {
-                        structure.addElement(object);
-                    });
-                    engine.objects.push(structure);
-                }
-                if(this.elements.length==1) {
-                    let object = this.elements[0];
-                    if(object.hasFeature(Feature.Placeable)) {
-                        let casted = <IPlaceable><any>object;
-                        casted.position = casted.position.addPoint(this.position);
-                        engine.objects.push(object);
-                        let idx = engine.objects.indexOf(this);
-                        engine.objects.splice(idx,1);
-                    }
-                }
-                this.hovering=null;
-                engine.render();
             }
+            //as a result, we have to check for multiple things:
+            /*
+                * 1. is this structure down to one element? -> Remove the structure
+                * 2. Did this break up the structure into two discrete structures? -> build a new structure
+                * 3. Did the new structures each contain only one element? -> remove them.
+                */
+            //first: the complex part.
+            let split = this.findDisconnectedElements();
+            //first of all: let's remove all found elements from our own array.
+            split.forEach(object => {
+                let idx = this.elements.indexOf(object);
+                this.elements.splice(idx,1);
+            });
+            if(split.length==1) {
+                //this is a single object, so we have to "free it".
+                let object = split[0];
+                if(object.hasFeature(Feature.Placeable)) {
+                    let cast = <IPlaceable><any>object;
+                    cast.position = cast.position.addPoint(this.position);
+                }
+                engine.objects.push(object);
+            } else if(split.length > 1) {
+                //so now we have another set which we have to create a structure for.
+                let structure = new Structure();
+                structure.position=this.position;
+                split.forEach(object => {
+                    structure.addElement(object);
+                });
+                engine.objects.push(structure);
+            }
+            if(this.elements.length==1) {
+                let object = this.elements[0];
+                if(object.hasFeature(Feature.Placeable)) {
+                    let casted = <IPlaceable><any>object;
+                    casted.position = casted.position.addPoint(this.position);
+                    engine.objects.push(object);
+                    let idx = engine.objects.indexOf(this);
+                    engine.objects.splice(idx,1);
+                }
+            }
+            this.hovering=null;
+            engine.render();
             this.pressed=false;
             this.shadowedPosition = null;
         }
