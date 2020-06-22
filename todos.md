@@ -15,7 +15,7 @@
 * [x] toolbar to add new items
 * [x] save the whole thing as a json file
 * [x] loading json files again
-* [ ] generate hi-res image
+* [x] generate hi-res image
 * [ ] support for Objects
 * [ ] support for Wall Decorations
 * [ ] allow rotation while placing a new object

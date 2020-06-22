@@ -19,7 +19,7 @@ namespace Testing {
             wall.rotation = MapObjects.Angles.Zero;
             engine.placeNewObject(wall);
         });
-        
+
         $(document).on('click','#save',function(){
             if ($("#save_link").attr('href') != "") {
                 URL.revokeObjectURL($("#save_link").attr('href'));
@@ -41,6 +41,16 @@ namespace Testing {
                 engine.render();
             }
             reader.readAsText(file);
+        });
+        $(document).on('click','#image',function(){
+            let encoded=engine.buildHiResImage();
+            if($("#image_link").attr('href')!="") {
+                URL.revokeObjectURL($("#image_link").attr('href'));
+            }
+            let blob = MapEngine.dataURLtoBlob(encoded);
+            let url = URL.createObjectURL(blob);
+            $("#image_link").attr('href',url);
+            $("#image_link")[0].click();
         });
 
         engine.render();

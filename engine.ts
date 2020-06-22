@@ -64,8 +64,12 @@ namespace MapEngine {
             this.canvas.addEventListener('mousemove',this.onMouseMove);
             this.canvas.addEventListener('mousedown',this.onMouseDown);
             this.canvas.addEventListener('mouseup',this.onMouseUp);
-            this.deleteButton.addEventListener('click',this.deleteClick);
-            this.rotateButton.addEventListener('click',this.rotateClick);
+            if(this.deleteButton != null) {
+                this.deleteButton.addEventListener('click',this.deleteClick);
+            }
+            if(this.rotateButton != null) {
+                this.rotateButton.addEventListener('click',this.rotateClick);
+            }
 
             this.offscreen = document.createElement('canvas');
             document.body.appendChild(this.offscreen);
@@ -308,6 +312,21 @@ namespace MapEngine {
             this.focused=null;
             this.mousePosition = (<MapObjects.IPlaceable><any>obj).position;
             this.mouseState=MouseState.primaryDownMoved;
+        }
+
+        buildHiResImage():string {
+            let canvas = document.createElement("canvas") as HTMLCanvasElement;
+            canvas.width=this.mapSize.width;
+            canvas.height=this.mapSize.height;
+            canvas.style.display="none";
+            document.body.appendChild(canvas);
+            let engine = new Engine(canvas,this.background,null,null);
+            engine.objects=this.objects;
+            engine.render();
+            let url = canvas.toDataURL('image/png');
+            document.body.removeChild(canvas);
+            document.body.removeChild(engine.offscreen);
+            return url;
         }
     }
 }
