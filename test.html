@@ -6,16 +6,59 @@
         <style>
             canvas {
                 display: block;
+                float:left;
+            }
+            div.sidebar {
+                float: left;
+                padding-left: 10px;
+                height: 600px;
+                overflow: scroll;
+            }
+            div.footerbar {
+                clear: both;
+            }
+            .sidebar .wall:hover {
+                background-color: blue;
+            }
+            .sidebar .objects {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .sidebar .objects img {
+                height:16px;
+            }
+
+            .sidebar .objects img.special {
+                height:auto;
             }
         </style>
     </head>
     <body>
         <img src="Assets/Mat.png" id="background" style="display: none;">
-        <img src="Assets/Walls/Wallx12.png" id="wall_12" style="display: none;" data-x1="16" data-y1="16" data-x2="279" data-y2="16">
         <canvas width="600" height="600" id="canvas">
 
         </canvas>
-        <button id="delete" style="display:none;">Delete</button>
-        <button id="rotate" style="display:none;">Rotate</button>
+        <div class="sidebar">
+            <ul class="objects">
+                <li><img class="wall" src="Assets/Walls/Wide-Entrance-Wallx2.png" id="wide_entrance_wall_2" data-x1="16" data-y1="16" data-x2="561" data-y2="16"></li>
+
+                <li><img class="wall" src="Assets/Walls/Wallx12.png" id="wall_12" data-x1="16" data-y1="16" data-x2="279" data-y2="16"></li>
+                <li><img class="wall" src="Assets/Walls/Wide-Hatchway-Wallx5.png" id="wide_hatchway_wall_5" data-x1="16" data-y1="16" data-x2="279" data-y2="16"></li>
+                <li><img class="wall" src="Assets/Walls/Hatchway-Wallx3.png" id="hatchway_wall_3" data-x1="16" data-y1="16" data-x2="279" data-y2="16"></li>
+                <li><img class="wall" src="Assets/Walls/Window-Wallx3.png" id="window_wall_3" data-x1="16" data-y1="16" data-x2="279" data-y2="16"></li>
+                <li><img class="wall" src="Assets/Walls/Entrance-Wallx2.png" id="entrance_wall_2" data-x1="16" data-y1="16" data-x2="279" data-y2="16"></li>
+                <li><img class="wall" src="Assets/Walls/Cell-Wall.png" id="cell_wall" data-x1="16" data-y1="16" data-x2="279" data-y2="16"></li>
+
+                <li><img class="wall" src="Assets/Walls/Half-Wallx3.png" id="half_wall_3" data-x1="16" data-y1="16" data-x2="140" data-y2="16"></li>
+                <li><img class="wall" src="Assets/Walls/Half-Wall-Hatchwayx2.png" id="half_wall_hatchway_2" data-x1="16" data-y1="16" data-x2="140" data-y2="16"></li>
+                <li><img class="wall special" src="Assets/Walls/Quarantine-Partition.png" id="quarantine_partition" data-x1="2" data-y1="16" data-x2="265" data-y2="279" width="143"></li>
+            </ul>
+        </div>
+        <div class="footerbar">
+            <button id="delete" style="display:none;">Delete</button>
+            <button id="rotate" style="display:none;">Rotate</button>
+        </div>
     </body>
 </html>

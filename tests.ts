@@ -27,6 +27,13 @@ namespace Testing {
         wall.rotation = MapObjects.Angles.Zero;
         engine.objects.push(wall);
 
+        $(document).on('click','.wall',function(){
+            wall = new MapObjects.Wall(this);
+            wall.position = new MapObjects.Point(0,0);
+            wall.rotation = MapObjects.Angles.Zero;
+            engine.placeNewObject(wall);
+        });
+
         engine.render();
     });
 }

@@ -206,6 +206,9 @@ namespace MapEngine {
         }
 
         onMouseDown: {(event:MouseEvent):void} = (event:MouseEvent) => {
+            if(this.mouseState != MouseState.idle) {
+                return;
+            }
             let pt = new MapObjects.Point(event.offsetX,event.offsetY);
             let converted = MapObjects.Point.fromDOMPoint(this.interactionmatrix.transformPoint(pt.toDOMPoint()));
             if(this.focused != null && this.focused.handlesMouseEvents() && this.focused === this.hovering) {
@@ -294,5 +297,17 @@ namespace MapEngine {
             }
         }
 
+        /*
+         * Places a new object and brings the engine into drag'n'drop mode.
+         * that way, you simply click on a element in the sidebar and
+         * start moving the mouse into the map.
+         */
+        placeNewObject(obj:MapObjects.MapObject) {
+            this.objects.push(obj);
+            this.hovering=obj;
+            this.focused=null;
+            this.mousePosition = (<MapObjects.IPlaceable><any>obj).position;
+            this.mouseState=MouseState.primaryDownMoved;
+        }
     }
 }
