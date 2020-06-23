@@ -298,7 +298,7 @@ namespace MapEngine {
         }
 
         delete(object:MapObjects.MapObject) {
-            let idx = this.objects.indexOf(this.focused);
+            let idx = this.objects.indexOf(object);
             this.objects.splice(idx,1);
             this.hovering=null;
             this.render();
