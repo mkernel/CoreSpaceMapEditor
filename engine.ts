@@ -64,6 +64,8 @@ namespace MapEngine {
             this.canvas.addEventListener('mousemove',this.onMouseMove);
             this.canvas.addEventListener('mousedown',this.onMouseDown);
             this.canvas.addEventListener('mouseup',this.onMouseUp);
+            this.canvas.ownerDocument.addEventListener('keydown',this.onKeyPress);
+
             if(this.deleteButton != null) {
                 this.deleteButton.addEventListener('click',this.deleteClick);
             }
@@ -274,6 +276,58 @@ namespace MapEngine {
             } 
             this.mouseState = MouseState.idle;
             this.shadowedPosition=null;
+        }
+
+        onKeyPress: {(event:KeyboardEvent):void} = (event:KeyboardEvent) => {
+            if(event.code=='Backspace') {
+                this.delete(this.hovering);
+            }
+            if(event.code=='ArrowLeft') {
+                this.rotate(this.hovering,true);
+            }
+            if(event.code=='ArrowRight') {
+                this.rotate(this.hovering,false);
+            }
+        }
+
+        delete(object:MapObjects.MapObject) {
+            let idx = this.objects.indexOf(this.focused);
+            this.objects.splice(idx,1);
+            this.hovering=null;
+            this.render();
+        }
+
+        rotate(object:MapObjects.MapObject,clockwise:boolean) {
+            let angles = [MapObjects.Angles.Zero,MapObjects.Angles.Fourtyfive,MapObjects.Angles.Ninety,MapObjects.Angles.HundredThirtyFive];
+            if(!clockwise) {
+                angles = angles.reverse();
+            }
+            if(object.hasFeature(MapObjects.Feature.Rotateable)) {
+                let cast = <MapObjects.IRotateable><any>object;
+                let found = false;
+                for (let idx in angles) {
+                    let angle=angles[idx];
+                    if(clockwise) {
+                        if(cast.rotation < angle) {
+                            cast.rotation = angle;
+                            found = true;
+                            this.render();
+                            break;
+                        }
+                    } else {
+                        if(cast.rotation > angle) {
+                            cast.rotation = angle;
+                            found = true;
+                            this.render();
+                            break;
+                        }
+                    }
+                }
+                if(!found) {
+                    cast.rotation = angles[0];
+                    this.render();
+                }
+            }
         }
 
         deleteClick: {(event:MouseEvent) : void} = (event:MouseEvent) => {
