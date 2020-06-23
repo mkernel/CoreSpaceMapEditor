@@ -24,7 +24,7 @@
             .sidebar .wall:hover, .sidebar .object:hover {
                 background-color: blue;
             }
-            .sidebar .walls, .sidebar .objects {
+            .sidebar .walls, .sidebar .objects, .sidebar .parts {
                 list-style: none;
                 margin: 0;
                 padding: 0;
@@ -52,6 +52,10 @@
 
             div.notes {
                 clear: both;
+            }
+
+            ul.parts img {
+                height: 16px;
             }
         </style>
     </head>
@@ -127,6 +131,12 @@
                     <li><button id="load">Load Map</button> <input type="file" id="load_file" style="display: none;"></li>
                     <li><button id="image">Generate Image</button><a style="display:none" id="image_link" download="map.png" href="">Download</a></li>
                 </ul>
+            </div>
+            <h3>Parts List</h3>
+            <div>
+                <ul class="parts">
+
+                </ul>                
             </div>
         </div>
         <div class="notes">

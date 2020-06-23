@@ -3,6 +3,7 @@
 /// <reference path="mapobject.ts" />
 /// <reference path="enginehelpers.ts" />
 /// <reference path="structure.ts" />
+/// <reference path="setcalculator.ts" />
 
 namespace MapEngine {
 
@@ -36,6 +37,8 @@ namespace MapEngine {
         mousePosition:MapObjects.Point;
         mouseState:MouseState = MouseState.idle;
         
+        setCalculator = new Sets.SetCalculator();
+        frameFinished: {():void};
 
         constructor(canvas:HTMLCanvasElement,background:HTMLImageElement,deleteButton:HTMLButtonElement,rotateButton:HTMLButtonElement) {
             this.canvas = canvas;
@@ -132,6 +135,10 @@ namespace MapEngine {
                 this.context.restore();
             });
             this.context.restore();
+            this.setCalculator.updateList(this.objects);
+            if(this.frameFinished != null) {
+                this.frameFinished();
+            }
         }
 
         onMouseMove: { (event:MouseEvent) : void } = (event:MouseEvent) => {

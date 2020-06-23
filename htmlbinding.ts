@@ -65,6 +65,16 @@ namespace Testing {
             $("#image_link")[0].click();
         });
 
+        engine.frameFinished = () => {
+            $("div ul.parts").html("");
+            let list = engine.setCalculator.placedParts;
+            for (let key in list) {
+                let available = list[key].available;
+                let placed = list[key].placed;
+                let img = $("#"+key).attr('src');
+                $("div ul.parts").append("<li><img src='"+img+"'> "+placed+"/"+available+"</li>");
+            }
+        }
         engine.render();
     });
 }
