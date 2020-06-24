@@ -305,7 +305,15 @@ namespace MapEngine {
         }
 
         rotate(object:MapObjects.MapObject,clockwise:boolean) {
-            let angles = [MapObjects.Angles.Zero,MapObjects.Angles.Fourtyfive,MapObjects.Angles.Ninety,MapObjects.Angles.HundredThirtyFive];
+            let angles = [MapObjects.Angles.Zero,
+                MapObjects.Angles.Fourtyfive,
+                MapObjects.Angles.Ninety,
+                MapObjects.Angles.HundredThirtyFive,
+                MapObjects.Angles.HundretEighty,
+                MapObjects.Angles.TwoHundredTwentyFive,
+                MapObjects.Angles.TwoHundredSeventy,
+                MapObjects.Angles.ThreeHundredFifteen
+            ];
             if(!clockwise) {
                 angles = angles.reverse();
             }
@@ -348,7 +356,15 @@ namespace MapEngine {
 
         rotateClick: {(event:MouseEvent):void} = (event:MouseEvent) => {
             let casted = <MapObjects.IRotateable><any>this.focused;
-            let angles = [MapObjects.Angles.Zero,MapObjects.Angles.Fourtyfive,MapObjects.Angles.Ninety,MapObjects.Angles.HundredThirtyFive];
+            let angles = [MapObjects.Angles.Zero,
+                MapObjects.Angles.Fourtyfive,
+                MapObjects.Angles.Ninety,
+                MapObjects.Angles.HundredThirtyFive,
+                MapObjects.Angles.HundretEighty,
+                MapObjects.Angles.TwoHundredTwentyFive,
+                MapObjects.Angles.TwoHundredSeventy,
+                MapObjects.Angles.ThreeHundredFifteen
+            ];
             let found=false;
             for(let angle in angles) {
                 if(angles[angle] > casted.rotation) {

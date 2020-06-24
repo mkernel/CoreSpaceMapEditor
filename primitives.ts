@@ -85,5 +85,9 @@ namespace MapObjects {
         Fourtyfive = 45.0 * Math.PI / 180,
         Ninety = 90.0 * Math.PI / 180,
         HundredThirtyFive = 135.0 * Math.PI / 180,
+        HundretEighty = 180.0 * Math.PI / 180,
+        TwoHundredTwentyFive = 225.0 * Math.PI / 180,
+        TwoHundredSeventy = 270.0 * Math.PI / 180,
+        ThreeHundredFifteen = 315.0 * Math.PI / 180,
     }
 }
