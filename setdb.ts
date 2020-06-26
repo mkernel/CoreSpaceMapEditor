@@ -1,3 +1,5 @@
+import { timers } from "jquery";
+
 namespace MapEngine.Sets {
 
     export enum Part {
@@ -45,6 +47,10 @@ namespace MapEngine.Sets {
 
     export class SetDB {
         coreSet:any = {};
+        cyberpunk:any = {};
+        shootOutAtZeds:any = {};
+        purgeOutbreak:any = {};
+        shuttle:any = {};
 
         constructor() {
             this.coreSet[Part.WideEntrance] = 2;
@@ -69,7 +75,46 @@ namespace MapEngine.Sets {
             this.coreSet[Part.ShopCounter] = 2;
             this.coreSet[Part.ShopDisplayStand] = 2;
             this.coreSet[Part.WallConsole] = 2;
+            this.coreSet[Part.GroundConduit] = 2;
 
+            this.cyberpunk[Part.WideEntrance] = 2;
+            this.cyberpunk[Part.Wall] = 12;
+            this.cyberpunk[Part.WideHatchway] = 5;
+            this.cyberpunk[Part.Hatchway] = 3;
+            this.cyberpunk[Part.Window] = 3;
+            this.cyberpunk[Part.Entrance] = 2;
+            this.cyberpunk[Part.HalfWall] = 3;
+            this.cyberpunk[Part.HalfWallHatchway] = 2;
+            this.cyberpunk[Part.Chair] = 2;
+            this.cyberpunk[Part.LargeCrateGreen] = 2;
+            this.cyberpunk[Part.LargeCrateYellow] = 2;
+            this.cyberpunk[Part.SmallCrateGreen] = 2;
+            this.cyberpunk[Part.SmallCrateGreen] = 2;
+            this.cyberpunk[Part.Table] = 2;
+            this.cyberpunk[Part.Workstation] = 2;
+            this.cyberpunk[Part.AdvertisingBoard] = 2;
+            this.cyberpunk[Part.Bunk] = 2;
+            this.cyberpunk[Part.Girder] = 4;
+            this.cyberpunk[Part.Locker] = 2;
+            this.cyberpunk[Part.ShopCounter] = 2;
+            this.cyberpunk[Part.ShopDisplayStand] = 2;
+            this.cyberpunk[Part.WallConsole] = 2;
+            this.cyberpunk[Part.GroundConduit] = 2;
+
+            this.shootOutAtZeds[Part.ZedsBar] = 1;
+            this.shootOutAtZeds[Part.QuarantinePartition] = 1;
+            this.shootOutAtZeds[Part.Screen] = 1;
+            this.shootOutAtZeds[Part.HalfWall] = 1;
+            this.shootOutAtZeds[Part.Wall] = 4;
+            this.shootOutAtZeds[Part.Window] = 1;
+            this.shootOutAtZeds[Part.Hatchway] = 1;
+            this.shootOutAtZeds[Part.WideHatchway] = 1;
+
+            this.purgeOutbreak[Part.Cell] = 2;
+            this.purgeOutbreak[Part.Reactor] = 1;
+            this.purgeOutbreak[Part.AutoDoc] = 1;
+
+            this.shuttle[Part.Shuttle] = 1;
         }
 
         sets() {
