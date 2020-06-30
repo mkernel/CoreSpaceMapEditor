@@ -22,16 +22,16 @@
             div.footerbar {
                 clear: both;
             }
-            .sidebar .wall:hover, .sidebar .object:hover {
+            .sidebar .wall:hover, .sidebar .object:hover, .sidebar .spawnpoint:hover {
                 background-color: blue;
             }
-            .sidebar .walls, .sidebar .objects, .sidebar .parts {
+            .sidebar .walls, .sidebar .objects, .sidebar .parts, .sidebar .spawn {
                 list-style: none;
                 margin: 0;
                 padding: 0;
             }
 
-            .sidebar .objects li {
+            .sidebar .objects li, .sidebar .spawn li {
                 float: left;
             }
 
@@ -43,7 +43,7 @@
                 height:16px;
             }
 
-            .sidebar .objects img {
+            .sidebar .objects img, .sidebar .spawn img {
                 height: 50px;
             }
 
@@ -121,6 +121,18 @@
                     <li><img class="object" src="Assets/Walldecoration//Storage-Locker.png" id="storage_locker"></li>
                     <li><img class="object" src="Assets/Walldecoration/Wall-Consolex2.png" id="wall_console_2"></li>
                     <li><img class="object" src="Assets/Walldecoration/Zeds-Bar.png" id="zeds_bar"></li>
+                </ul>
+            </div>
+            <h3>Airlocks / Spawnpoints</h3>
+            <div>
+                <ul class="spawn">
+                    <li><img class="spawnpoint" src="Assets/Icons/Airlock-Door.png" id="airlock"></li>
+                    <li><img class="spawnpoint" src="Assets/Icons/Entry-Point-1.png" id="entry-1"></li>
+                    <li><img class="spawnpoint" src="Assets/Icons/Entry-Point-2.png" id="entry-2"></li>
+                    <li><img class="spawnpoint" src="Assets/Icons/Entry-Point-3.png" id="entry-3"></li>
+                    <li><img class="spawnpoint" src="Assets/Icons/Entry-Point-4.png" id="entry-4"></li>
+                    <li><img class="spawnpoint" src="Assets/Icons/Entry-Point-5.png" id="entry-5"></li>
+                    <li><img class="spawnpoint" src="Assets/Icons/Entry-Point-6.png" id="entry-6"></li>
                 </ul>
             </div>
             <h3>Functions</h3>

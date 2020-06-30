@@ -1,6 +1,7 @@
 /// <reference path="engine.ts" />
 /// <reference path="wall.ts" />
 /// <reference path="object.ts" />
+/// <reference path="spawn.ts" />
 /// <reference path="serializer.ts" />
 /// <reference types="jquery" />
 /// <reference types="jqueryui" />
@@ -24,6 +25,12 @@ namespace Testing {
         });
         $(document).on('click','.object',function(){
             let object = new MapObjects.Object(this);
+            object.position = new MapObjects.Point(0,0);
+            object.rotation = MapObjects.Angles.Zero;
+            engine.placeNewObject(object);
+        });
+        $(document).on('click','.spawnpoint',function(){
+            let object = new MapObjects.Spawnpoint(this);
             object.position = new MapObjects.Point(0,0);
             object.rotation = MapObjects.Angles.Zero;
             engine.placeNewObject(object);

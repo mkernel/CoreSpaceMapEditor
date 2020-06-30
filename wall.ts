@@ -6,6 +6,7 @@ namespace MapObjects {
 
     export class Wall extends MapObject implements IPlaceable, IRotateable, IJoinable {
         position: Point;
+        area:Placement;
         rotation: number;
         rotationCenter: Point;
         joints: Point[];
@@ -17,6 +18,7 @@ namespace MapObjects {
 
         constructor(image:HTMLImageElement) {
             super();
+            this.area = Placement.OnMap;
             this.image = image;
             //for now, walls will only have two joints.
             let x1 = parseInt($(this.image).data("x1"));

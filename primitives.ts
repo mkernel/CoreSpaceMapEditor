@@ -34,6 +34,10 @@ namespace MapObjects {
         length(): number {
             return Math.sqrt(this.x*this.x+this.y*this.y);
         }
+
+        equals(pt:Point): boolean {
+            return pt.x == this.x && pt.y == this.y;
+        }
     }
 
     export class Size {
@@ -78,6 +82,11 @@ namespace MapObjects {
         Placeable = 1,
         Rotateable,
         Joinable
+    }
+
+    export enum Placement {
+        OnMap = 1,
+        AroundMap = 2
     }
 
     export enum Angles {

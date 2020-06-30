@@ -5,6 +5,7 @@
 namespace MapObjects {
     export class Object extends MapObject implements IPlaceable,IRotateable {
         position:Point;
+        area:Placement;
         rotation:number;
         rotationCenter:Point;
         image: HTMLImageElement;
@@ -15,6 +16,7 @@ namespace MapObjects {
 
         constructor(image:HTMLImageElement) {
             super()
+            this.area = Placement.OnMap;
             this.image = image;
             this.rotationCenter = new Point(image.naturalWidth/2,image.naturalHeight/2);
         }

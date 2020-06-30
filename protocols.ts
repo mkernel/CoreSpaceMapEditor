@@ -5,6 +5,7 @@ namespace MapObjects {
 
     export interface IPlaceable {
         position:Point;
+        area:Placement;
     }
 
     export interface IRotateable {

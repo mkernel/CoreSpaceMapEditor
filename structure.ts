@@ -8,12 +8,18 @@ namespace MapObjects {
     export class Structure extends MapObject implements IPlaceable,IJoinable {
         elements:MapObject[] = [];
         position:Point;
+        area:Placement;
         joints:Point[];
 
         hovering:MapObject;
         pressed:boolean;
         shadowedPosition:Point;
         mousePosition:Point;
+
+        constructor() {
+            super();
+            this.area = Placement.OnMap;
+        }
 
         getFeatures():Feature[] {
             return [Feature.Placeable,Feature.Joinable];

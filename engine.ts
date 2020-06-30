@@ -21,6 +21,7 @@ namespace MapEngine {
         renderingSize: MapObjects.Size;
         background: HTMLImageElement;
         mapSize: MapObjects.Size;
+        totalSize: MapObjects.Size;
         scaling: number;
         offset: MapObjects.Point;
         interactionmatrix: DOMMatrix;
@@ -48,20 +49,24 @@ namespace MapEngine {
             this.renderingSize = new MapObjects.Size(this.canvas.width,this.canvas.height);
             this.background = background;
             this.mapSize = new MapObjects.Size(background.naturalWidth,background.naturalHeight);
-            if(this.mapSize.width <= this.renderingSize.width && this.mapSize.height < this.renderingSize.height) {
+            //we need to add an area outside of the map. 
+            this.totalSize = new MapObjects.Size(background.naturalWidth+2*69,background.naturalHeight+2*69);
+            if(this.totalSize.width <= this.renderingSize.width && this.totalSize.height < this.renderingSize.height) {
                 this.scaling = 1.0;
             } else {
-                let scalingWidth = this.renderingSize.width / this.mapSize.width;
-                let scalingHeight = this.renderingSize.height/ this.mapSize.height;
+                let scalingWidth = this.renderingSize.width / this.totalSize.width;
+                let scalingHeight = this.renderingSize.height/ this.totalSize.height;
                 this.scaling = Math.min(scalingWidth,scalingHeight);
             }
-            let scaledSize = this.mapSize.scale(this.scaling);
+            let scaledSize = this.totalSize.scale(this.scaling);
             let diff = this.renderingSize.subtract(scaledSize);
             diff = diff.scale(0.5);
             this.offset = new MapObjects.Point(diff.width,diff.height);
             this.interactionmatrix = new DOMMatrix();
             this.interactionmatrix.translateSelf(this.offset.x,this.offset.y);
+            //we have to translate agein
             this.interactionmatrix.scaleSelf(this.scaling,this.scaling);
+            this.interactionmatrix.translateSelf(69,69);
             this.interactionmatrix.invertSelf();
 
             this.canvas.addEventListener('mousemove',this.onMouseMove);
@@ -78,11 +83,10 @@ namespace MapEngine {
 
             this.offscreen = document.createElement('canvas');
             document.body.appendChild(this.offscreen);
-            this.offscreen.width=this.mapSize.width;
-            this.offscreen.height=this.mapSize.height;
+            this.offscreen.width=this.totalSize.width;
+            this.offscreen.height=this.totalSize.height;
             this.offscreen.style.display="none";
             this.offscreenContext = this.offscreen.getContext('2d');
-
         }
 
         render() {
@@ -90,7 +94,9 @@ namespace MapEngine {
             this.context.fillStyle="white";
             this.context.fillRect(0,0,this.renderingSize.width,this.renderingSize.height);
             this.context.translate(this.offset.x,this.offset.y);
+            //and another translation for the area "around"
             this.context.scale(this.scaling,this.scaling);
+            this.context.translate(69,69);
             this.context.drawImage(this.background,0,0);
             this.objects.forEach(object => {
                 this.context.save();
@@ -98,30 +104,32 @@ namespace MapEngine {
                 if(this.focused === object) {
                     if(!object.customFocusRenderer()) {
                         this.offscreenContext.save();
-                        this.offscreenContext.clearRect(0,0,this.mapSize.width,this.mapSize.height);
+                        this.offscreenContext.translate(69,69);
+                        this.offscreenContext.clearRect(-69,-69,this.totalSize.width,this.totalSize.height);
                         renderObject(object,this.offscreenContext);
                         this.offscreenContext.globalCompositeOperation = "source-in";
                         this.offscreenContext.fillStyle="#00F";
-                        this.offscreenContext.fillRect(0,0,this.mapSize.width,this.mapSize.height);
+                        this.offscreenContext.fillRect(-69,-69,this.totalSize.width,this.totalSize.height);
                         this.offscreenContext.restore();
                     }
                 }
                 else if(this.hovering === object) {
                     this.offscreenContext.save();
-                    this.offscreenContext.clearRect(0,0,this.mapSize.width,this.mapSize.height);
+                    this.offscreenContext.translate(69,69);
+                    this.offscreenContext.clearRect(-69,-69,this.totalSize.width,this.totalSize.height);
                     //we need the rendered object in a new canvas
                     renderObject(object,this.offscreenContext);
                     //render the object
                     this.offscreenContext.globalCompositeOperation = "source-in";
                     this.offscreenContext.fillStyle="#888";
-                    this.offscreenContext.fillRect(0,0,this.mapSize.width,this.mapSize.height);
+                    this.offscreenContext.fillRect(-69,-69,this.totalSize.width,this.totalSize.height);
                     this.offscreenContext.restore();
                 }
 
 
                 if(this.focused === object) {
                     if(!object.customFocusRenderer()) {
-                        this.context.drawImage(this.offscreen,0,0);
+                        this.context.drawImage(this.offscreen,-69,-69);
                     } else {
                         renderObject(object,this.context,true,this.offscreenContext);
                     }
@@ -129,7 +137,7 @@ namespace MapEngine {
                     renderObject(object,this.context);
                     if(this.hovering === object) {
                         this.context.globalCompositeOperation="lighter";
-                        this.context.drawImage(this.offscreen,0,0);
+                        this.context.drawImage(this.offscreen,-69,-69);
                     }
                 }
                 this.context.restore();
@@ -145,7 +153,7 @@ namespace MapEngine {
             //first off, we need the current position:
             let pt = new MapObjects.Point(event.offsetX,event.offsetY);
             let converted = MapObjects.Point.fromDOMPoint(this.interactionmatrix.transformPoint(pt.toDOMPoint()));
-            let rect=new MapObjects.Rect(new MapObjects.Point(0,0),this.mapSize);
+            let rect=new MapObjects.Rect(new MapObjects.Point(-69,-69),this.totalSize);
             if(rect.containsPoint(converted)) {
                 /*
                  * Mouse Event Handling rules:
@@ -167,28 +175,73 @@ namespace MapEngine {
                 }
                 else if((this.mouseState == MouseState.primaryDown || this.mouseState==MouseState.primaryDownMoved) && this.hovering.hasFeature(MapObjects.Feature.Placeable)) {
                     /*
-                    a pressed primary button WHILE moving means: drag and drop.
-                    */
-                    this.mouseState = MouseState.primaryDownMoved;
+                     * a pressed primary button WHILE moving means: drag and drop.
+                     */
                     let casted = <MapObjects.IPlaceable><any>(this.hovering);
-                    let pt = casted.position;
-                    if(this.shadowedPosition != null) {
-                        pt = this.shadowedPosition;
-                    }
-                    let diff = converted.subtractPoint(this.mousePosition);
-                    pt = pt.addPoint(diff);
-                    /*
-                    as we now have the "new" position, we have to do a snap-test against "everything".
-                    */
-                    let snapPt = snapTest(this.hovering,pt,this.objects,this.scaling);
-                    if(snapPt != null) {
-                        casted.position=snapPt[0];
-                        this.snappingTarget=snapPt[1];
-                        this.shadowedPosition = pt;
+                    this.mouseState = MouseState.primaryDownMoved;
+                    if(casted.area == MapObjects.Placement.OnMap) {
+                        //we're only going to support drag and drop while on the map
+                        let mapRect = new MapObjects.Rect(new MapObjects.Point(0,0),this.mapSize);
+                        if(!mapRect.containsPoint(converted)) {
+                            /* 
+                             * we need to return early as we need to keep the stored mouse position 
+                             * and the objects positions relativity constant
+                             */
+                            return;
+                        }
+                        let pt = casted.position;
+                        this.mouseState = MouseState.primaryDownMoved;
+                        if(this.shadowedPosition != null) {
+                            pt = this.shadowedPosition;
+                        }
+                        let diff = converted.subtractPoint(this.mousePosition);
+                        pt = pt.addPoint(diff);
+                        /*
+                        as we now have the "new" position, we have to do a snap-test against "everything".
+                        */
+                        let snapPt = snapTest(this.hovering,pt,this.objects,this.scaling);
+                        if(snapPt != null) {
+                            casted.position=snapPt[0];
+                            this.snappingTarget=snapPt[1];
+                            this.shadowedPosition = pt;
+                        } else {
+                            this.shadowedPosition = null;
+                            this.snappingTarget = null;
+                            casted.position=pt;
+                        }
                     } else {
-                        this.shadowedPosition = null;
-                        this.snappingTarget = null;
-                        casted.position=pt;
+                        //this is the fun part! these objects will always be "around" the map
+                        //so we have to recalculate position and rotation automatically.
+                        //great fun!
+                        //the easiest way ist: build 4 points to the 4 borders and select the shortest path.
+                        let northPosition = new MapObjects.Point(converted.x,0);
+                        let eastPosition = new MapObjects.Point(this.mapSize.width,converted.y);
+                        let southPosition = new MapObjects.Point(converted.x,this.mapSize.height);
+                        let westPosition = new MapObjects.Point(0,converted.y);
+                        let vectors = [
+                            northPosition.subtractPoint(converted),
+                            eastPosition.subtractPoint(converted),
+                            southPosition.subtractPoint(converted),
+                            westPosition.subtractPoint(converted)
+                        ];
+                        vectors.sort((a,b)=>{return a.length() - b.length()});
+                        let destination = converted.addPoint(vectors[0]);
+                        if(destination.equals(northPosition)) {
+                            casted.position = northPosition;
+                            (<MapObjects.IRotateable><any>casted).rotation = MapObjects.Angles.Zero;
+                        }
+                        if(destination.equals(eastPosition)) {
+                            casted.position = eastPosition;
+                            (<MapObjects.IRotateable><any>casted).rotation = MapObjects.Angles.Ninety;
+                        }
+                        if(destination.equals(southPosition)) {
+                            casted.position = southPosition;
+                            (<MapObjects.IRotateable><any>casted).rotation = MapObjects.Angles.HundretEighty;
+                        }
+                        if(destination.equals(westPosition)) {
+                            casted.position = westPosition;
+                            (<MapObjects.IRotateable><any>casted).rotation = MapObjects.Angles.TwoHundredSeventy;
+                        }
                     }
                     this.render();
                 } 
