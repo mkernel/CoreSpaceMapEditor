@@ -448,8 +448,8 @@ namespace MapEngine {
 
         buildHiResImage():string {
             let canvas = document.createElement("canvas") as HTMLCanvasElement;
-            canvas.width=this.mapSize.width;
-            canvas.height=this.mapSize.height;
+            canvas.width=this.totalSize.width;
+            canvas.height=this.totalSize.height;
             canvas.style.display="none";
             document.body.appendChild(canvas);
             let engine = new Engine(canvas,this.background,null,null);
