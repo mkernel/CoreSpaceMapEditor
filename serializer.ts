@@ -2,6 +2,8 @@
 /// <reference path="mapobject.ts" />
 /// <reference path="wall.ts" />
 /// <reference path="structure.ts" />
+/// <reference path="object.ts" />
+/// <reference path="spawn.ts" />
 
 namespace MapEngine {
     export class Serializer {
@@ -45,6 +47,28 @@ namespace MapEngine {
                         }
                     });
                     result.objects.push(obj);
+                } else if (object instanceof MapObjects.Spawnpoint) {
+                    let obj = {
+                        type: "spawn",
+                        position: {
+                            x: object.position.x,
+                            y: object.position.y
+                        },
+                        rotation: object.rotation,
+                        id: object.image.id
+                    };
+                    result.objects.push(obj);
+                } else if(object instanceof MapObjects.Object) {
+                    let obj = {
+                        type: "object",
+                        position: {
+                            x: object.position.x,
+                            y: object.position.y
+                        },
+                        rotation: object.rotation,
+                        id: object.image.id
+                    };
+                    result.objects.push(obj);
                 }
             });
             return JSON.stringify(result);
@@ -73,6 +97,16 @@ namespace MapEngine {
                         });
                         structure.rebuildJoints();
                         result.push(structure);
+                    } else if(object.type == "object") {
+                        let loaded = new MapObjects.Object($("#"+object.id)[0] as HTMLImageElement);
+                        loaded.rotation = object.rotation;
+                        loaded.position = new MapObjects.Point(object.position.x,object.position.y);
+                        result.push(loaded);
+                    } else if(object.type == "spawn") {
+                        let loaded = new MapObjects.Spawnpoint($("#"+object.id)[0] as HTMLImageElement);
+                        loaded.rotation = object.rotation;
+                        loaded.position = new MapObjects.Point(object.position.x,object.position.y);
+                        result.push(loaded);
                     }
                 });
             }
