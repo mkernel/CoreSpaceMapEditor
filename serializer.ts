@@ -8,9 +8,10 @@
 namespace MapEngine {
     export class Serializer {
 
-        serialize(objects:MapObjects.MapObject[]) {
+        serialize(objects:MapObjects.MapObject[],is2x:boolean) {
             let result = {
-                version:"1.0",
+                version:"1.1",
+                is2x:is2x,
                 objects:[]
             };
             objects.forEach(object => {
@@ -74,10 +75,14 @@ namespace MapEngine {
             return JSON.stringify(result);
         }
 
-        deserialize(json:string):MapObjects.MapObject[] {
+        deserialize(json:string):[MapObjects.MapObject[],boolean] {
             let result:MapObjects.MapObject[] = [];
+            let is2x = false;
             let decoded = JSON.parse(json);
-            if(decoded.version=="1.0") {
+            if(decoded.version=="1.0" || decoded.version=="1.1") {
+                if(decoded.version=="1.1") {
+                    is2x = decoded.is2x;
+                }
                 decoded.objects.forEach(object => {
                     if(object.type == "wall") {
                         let wall = new MapObjects.Wall($("#"+object.id)[0] as HTMLImageElement);
@@ -110,7 +115,7 @@ namespace MapEngine {
                     }
                 });
             }
-            return result;
+            return [result,is2x];
         }
     }
 }

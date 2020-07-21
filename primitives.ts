@@ -55,6 +55,10 @@ namespace MapObjects {
         subtract(other:Size):Size {
             return new Size(this.width-other.width,this.height-other.height);
         }
+
+        divide(other:Size):Size {
+            return new Size(this.width/other.width,this.height/other.height);
+        }
     }
 
     export class Rect {

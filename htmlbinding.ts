@@ -15,7 +15,8 @@ namespace Testing {
         //this is domready, so let's get to it.
         let canvas = <HTMLCanvasElement>$("#canvas")[0];
         let background = <HTMLImageElement>$("#background")[0];
-        engine = new MapEngine.Engine(canvas,background,<HTMLButtonElement>($("#delete")[0]),<HTMLButtonElement>($("#rotate")[0]));
+        let background2x = <HTMLImageElement>$("#background2x")[0];
+        engine = new MapEngine.Engine(canvas,background,background2x,<HTMLButtonElement>($("#delete")[0]),<HTMLButtonElement>($("#rotate")[0]));
 
         $(document).on('click','.wall',function(){
             let wall = new MapObjects.Wall(this);
@@ -41,7 +42,7 @@ namespace Testing {
                 URL.revokeObjectURL($("#save_link").attr('href'));
             }
             let serializer = new MapEngine.Serializer();
-            let result = serializer.serialize(engine.objects);
+            let result = serializer.serialize(engine.objects,engine.is2x());
             let blob = new Blob([result],{type:"application/json"});
             let url = URL.createObjectURL(blob);
             $("#save_link").attr('href',url);
@@ -55,8 +56,11 @@ namespace Testing {
             let reader = new FileReader();
             reader.onload=function(e){
                 let serializer = new MapEngine.Serializer();
-                let objects = serializer.deserialize(e.target.result as string);
-                engine.objects = objects;
+                let result = serializer.deserialize(e.target.result as string);
+                if(result[1]) {
+                    engine.setup2x();
+                }
+                engine.objects = result[0];
                 engine.render();
             }
             reader.readAsText(file);
@@ -70,6 +74,12 @@ namespace Testing {
             let url = URL.createObjectURL(blob);
             $("#image_link").attr('href',url);
             $("#image_link")[0].click();
+        });
+        $(document).on('click','#2xbutton',function(){
+            engine.setup2x();
+        });
+        $(document).on('click','#1xbutton',function(){
+            engine.setup1x();
         });
 
         engine.frameFinished = () => {

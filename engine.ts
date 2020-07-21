@@ -20,6 +20,8 @@ namespace MapEngine {
         context: CanvasRenderingContext2D;
         renderingSize: MapObjects.Size;
         background: HTMLImageElement;
+        background1x: HTMLImageElement;
+        background2x: HTMLImageElement;
         mapSize: MapObjects.Size;
         totalSize: MapObjects.Size;
         scaling: number;
@@ -41,16 +43,70 @@ namespace MapEngine {
         setCalculator = new Sets.SetCalculator();
         frameFinished: {():void};
 
-        constructor(canvas:HTMLCanvasElement,background:HTMLImageElement,deleteButton:HTMLButtonElement,rotateButton:HTMLButtonElement) {
+        constructor(canvas:HTMLCanvasElement,background1x:HTMLImageElement,background2x:HTMLImageElement,deleteButton:HTMLButtonElement,rotateButton:HTMLButtonElement) {
             this.canvas = canvas;
             this.deleteButton=deleteButton;
             this.rotateButton=rotateButton;
             this.context = this.canvas.getContext("2d");
+            this.background1x = background1x;
+            this.background2x = background2x;
+            this.background = this.background1x;
+            if(this.deleteButton != null) {
+                this.deleteButton.addEventListener('click',this.deleteClick);
+            }
+            if(this.rotateButton != null) {
+                this.rotateButton.addEventListener('click',this.rotateClick);
+            }
+            this.offscreen = document.createElement('canvas');
+            document.body.appendChild(this.offscreen);
+            this.offscreen.style.display="none";
+
+            this.configure();
+
+        }
+
+        is2x():boolean {
+            return this.background === this.background2x;
+        }
+
+        setup1x() {
+            if(this.background === this.background1x) {
+                //we have nothing to do.
+            } else {
+                //we have to calculate the factor to switch from 2x to 1x.
+                let size2x = new MapObjects.Size(this.background2x.naturalWidth+2*69,this.background2x.naturalHeight+2*69);
+                let size1x = new MapObjects.Size(this.background1x.naturalWidth+2*69,this.background1x.naturalHeight+2*69);
+                this.background = this.background1x;
+                let scaling = size1x.divide(size2x);
+                this.canvas.width *=scaling.width;
+                this.canvas.height *=scaling.height;
+                this.configure();
+                this.render();
+            }
+        }
+
+        setup2x() {
+            if(this.background === this.background2x) {
+                //we have nothing to do.
+            } else {
+                //we have to calculate the factor to switch from 2x to 1x.
+                let size2x = new MapObjects.Size(this.background2x.naturalWidth+2*69,this.background2x.naturalHeight+2*69);
+                let size1x = new MapObjects.Size(this.background1x.naturalWidth+2*69,this.background1x.naturalHeight+2*69);
+                let scaling = size2x.divide(size1x);
+                console.log(scaling.height);
+                this.background = this.background2x;
+                this.canvas.width *=scaling.width;
+                this.canvas.height *=scaling.height;
+                this.configure();
+                this.render();
+            }
+        }
+
+        configure() {
             this.renderingSize = new MapObjects.Size(this.canvas.width,this.canvas.height);
-            this.background = background;
-            this.mapSize = new MapObjects.Size(background.naturalWidth,background.naturalHeight);
+            this.mapSize = new MapObjects.Size(this.background.naturalWidth,this.background.naturalHeight);
             //we need to add an area outside of the map. 
-            this.totalSize = new MapObjects.Size(background.naturalWidth+2*69,background.naturalHeight+2*69);
+            this.totalSize = new MapObjects.Size(this.background.naturalWidth+2*69,this.background.naturalHeight+2*69);
             if(this.totalSize.width <= this.renderingSize.width && this.totalSize.height < this.renderingSize.height) {
                 this.scaling = 1.0;
             } else {
@@ -74,18 +130,9 @@ namespace MapEngine {
             this.canvas.addEventListener('mouseup',this.onMouseUp);
             this.canvas.ownerDocument.addEventListener('keydown',this.onKeyPress);
 
-            if(this.deleteButton != null) {
-                this.deleteButton.addEventListener('click',this.deleteClick);
-            }
-            if(this.rotateButton != null) {
-                this.rotateButton.addEventListener('click',this.rotateClick);
-            }
 
-            this.offscreen = document.createElement('canvas');
-            document.body.appendChild(this.offscreen);
             this.offscreen.width=this.totalSize.width;
             this.offscreen.height=this.totalSize.height;
-            this.offscreen.style.display="none";
             this.offscreenContext = this.offscreen.getContext('2d');
         }
 
@@ -452,7 +499,7 @@ namespace MapEngine {
             canvas.height=this.totalSize.height;
             canvas.style.display="none";
             document.body.appendChild(canvas);
-            let engine = new Engine(canvas,this.background,null,null);
+            let engine = new Engine(canvas,this.background,this.background2x,null,null);
             engine.objects=this.objects;
             engine.render();
             let url = canvas.toDataURL('image/png');
